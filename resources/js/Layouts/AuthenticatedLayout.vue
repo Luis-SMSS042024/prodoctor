@@ -44,16 +44,16 @@ const isRouteActive = (pattern) => {
 <template>
     <div class="flex h-screen bg-slate-50 text-slate-800 font-sans overflow-hidden">
         
-        <!-- Sidebar Izquierda - Estilo Premium Oscuro (#0f1f3d para Doctor, #0c3c3e para Paciente) -->
+        <!-- Sidebar Izquierda - Estilo Premium Oscuro (#0f1f3d para Doctor, #0c3c3e para Paciente, #221830 para Admin) -->
         <aside
             class="w-64 text-white flex flex-col flex-shrink-0 shadow-lg z-20 transition-all duration-300"
-            :class="user.rol === 'paciente' ? 'bg-[#0c3c3e]' : 'bg-[#0f1f3d]'"
+            :class="user.rol === 'paciente' ? 'bg-[#0c3c3e]' : (user.rol === 'admin' ? 'bg-[#221830]' : 'bg-[#0f1f3d]')"
         >
             <!-- Brand Logo -->
             <div class="p-6 border-b border-slate-700/50 flex items-center gap-3">
                 <div
                     class="w-9 h-9 rounded-xl flex items-center justify-center shadow-lg transition-all duration-300"
-                    :class="user.rol === 'paciente' ? 'bg-gradient-to-tr from-teal-500 to-emerald-600 shadow-teal-500/20' : 'bg-gradient-to-tr from-blue-600 to-indigo-500 shadow-blue-500/20'"
+                    :class="user.rol === 'paciente' ? 'bg-gradient-to-tr from-teal-500 to-emerald-600 shadow-teal-500/20' : (user.rol === 'admin' ? 'bg-gradient-to-tr from-fuchsia-600 to-indigo-650 shadow-indigo-500/20' : 'bg-gradient-to-tr from-blue-600 to-indigo-500 shadow-blue-500/20')"
                 >
                     <!-- ECG Line cross logo -->
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-5 h-5 text-white">
@@ -71,7 +71,7 @@ const isRouteActive = (pattern) => {
             <div class="p-6 bg-[#0c182c]/40 border-b border-slate-700/30 flex items-center gap-3">
                 <div
                     class="w-10 h-10 rounded-full border flex items-center justify-center font-bold text-white shadow-md shadow-black/10 transition-all duration-300"
-                    :class="user.rol === 'paciente' ? 'bg-gradient-to-tr from-teal-500 to-emerald-600 border-teal-400/40' : 'bg-gradient-to-tr from-blue-500 to-indigo-650 border-blue-400/40'"
+                    :class="user.rol === 'paciente' ? 'bg-gradient-to-tr from-teal-500 to-emerald-600 border-teal-400/40' : (user.rol === 'admin' ? 'bg-gradient-to-tr from-fuchsia-600 to-indigo-650 border-fuchsia-400/40' : 'bg-gradient-to-tr from-blue-500 to-indigo-650 border-blue-400/40')"
                 >
                     {{ user.nombre_usuario ? user.nombre_usuario.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : 'US' }}
                 </div>
@@ -115,6 +115,66 @@ const isRouteActive = (pattern) => {
                     Mi Portal Médico
                 </Link>
 
+                <!-- Dashboard Admin -->
+                <Link
+                    v-if="user.rol === 'admin'"
+                    :href="route('admin.dashboard')"
+                    class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition duration-150"
+                    :class="isRouteActive('admin.dashboard')
+                        ? 'bg-fuchsia-600/15 text-fuchsia-355 border-l-4 border-fuchsia-500'
+                        : 'text-slate-400 hover:bg-slate-800/40 hover:text-white'"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
+                    </svg>
+                    Dashboard Admin
+                </Link>
+
+                <!-- Especialidades (Admin) -->
+                <Link
+                    v-if="user.rol === 'admin'"
+                    :href="route('admin.specialties.index')"
+                    class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition duration-150"
+                    :class="isRouteActive('admin.specialties.*')
+                        ? 'bg-fuchsia-600/15 text-fuchsia-355 border-l-4 border-fuchsia-500'
+                        : 'text-slate-400 hover:bg-slate-800/40 hover:text-white'"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9.53 16.122l.75-2.524a2.25 2.25 0 011.085-1.344l8.36-4.52a.75.75 0 011.07.67v8.948a.75.75 0 01-.643.742l-9.845 1.637a2.25 2.25 0 01-1.777-.384l-1.07-.643z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9V3m0 0L9 6m3-3l3 3" />
+                    </svg>
+                    Especialidades
+                </Link>
+
+                <!-- Doctores (Admin) -->
+                <Link
+                    v-if="user.rol === 'admin'"
+                    :href="route('admin.doctors.index')"
+                    class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition duration-150"
+                    :class="isRouteActive('admin.doctors.*')
+                        ? 'bg-fuchsia-600/15 text-fuchsia-355 border-l-4 border-fuchsia-500'
+                        : 'text-slate-400 hover:bg-slate-800/40 hover:text-white'"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                    </svg>
+                    Doctores
+                </Link>
+
+                <!-- Usuarios (Admin) -->
+                <Link
+                    v-if="user.rol === 'admin'"
+                    :href="route('admin.users.index')"
+                    class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition duration-150"
+                    :class="isRouteActive('admin.users.*')
+                        ? 'bg-fuchsia-600/15 text-fuchsia-355 border-l-4 border-fuchsia-500'
+                        : 'text-slate-400 hover:bg-slate-800/40 hover:text-white'"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    Usuarios
+                </Link>
                 <!-- Pacientes (Doctor) -->
                 <Link
                     v-if="user.rol === 'doctor'"

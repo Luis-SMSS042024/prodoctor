@@ -20,6 +20,10 @@ use App\Http\Controllers\Doctor\AppointmentController as DoctorAppointmentContro
 use App\Http\Controllers\Doctor\ProcedureController as DoctorProcedureController;
 use App\Http\Controllers\Doctor\ClinicalFollowUpController as DoctorFollowUpController;
 use App\Http\Controllers\Paciente\DashboardController as PatientDashboardController;
+use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\Admin\SpecialtyController as AdminSpecialtyController;
+use App\Http\Controllers\Admin\DoctorController as AdminDoctorController;
+use App\Http\Controllers\Admin\UserController as AdminUserController;
 
 Route::get('/dashboard', function () {
     $rol = auth()->user()->rol;
@@ -90,9 +94,38 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/paciente/appointments', [PatientDashboardController::class, 'requestAppointment'])->name('paciente.appointments.store');
     Route::put('/paciente/profile', [PatientDashboardController::class, 'updateProfile'])->name('paciente.profile.update');
 
-    Route::get('/admin/dashboard', function () {
-        return Inertia::render('Dashboard', ['rol' => 'admin']);
-    })->name('admin.dashboard');
+    // Portal de Administrador
+    Route::get('/admin/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
+    
+    // CRUD Especialidades
+    Route::resource('/admin/specialties', AdminSpecialtyController::class)->names([
+        'index' => 'admin.specialties.index',
+        'store' => 'admin.specialties.store',
+        'update' => 'admin.specialties.update',
+        'destroy' => 'admin.specialties.destroy',
+    ])->parameters([
+        'specialties' => 'especialidad'
+    ])->only(['index', 'store', 'update', 'destroy']);
+
+    // CRUD Doctores
+    Route::resource('/admin/doctors', AdminDoctorController::class)->names([
+        'index' => 'admin.doctors.index',
+        'store' => 'admin.doctors.store',
+        'update' => 'admin.doctors.update',
+        'destroy' => 'admin.doctors.destroy',
+    ])->parameters([
+        'doctors' => 'doctor'
+    ])->only(['index', 'store', 'update', 'destroy']);
+
+    // CRUD Usuarios
+    Route::resource('/admin/users', AdminUserController::class)->names([
+        'index' => 'admin.users.index',
+        'store' => 'admin.users.store',
+        'update' => 'admin.users.update',
+        'destroy' => 'admin.users.destroy',
+    ])->parameters([
+        'users' => 'usuario'
+    ])->only(['index', 'store', 'update', 'destroy']);
 });
 
 Route::middleware('auth')->group(function () {
