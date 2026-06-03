@@ -1,4 +1,4 @@
-# Integrantes:
+# Equipo de Trabajo: ProDoctor
 -Luis Alexander Rivera Alvarez
 -Ludwin Saul Vasquez Romero
 -Josué Alexander Turcios Quintanilla
