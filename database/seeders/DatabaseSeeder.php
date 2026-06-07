@@ -222,5 +222,33 @@ class DatabaseSeeder extends Seeder
             'fecha_seguimiento' => $hoy,
             'proxima_revision' => Carbon::today()->addDays(15)->toDateString(),
         ]);
+
+        // 8. Seed Doctor Availability Slots
+        $availabilities = [
+            // Dr. Mendez availability slots
+            ['id_doctor' => $docMendez->id_doctor, 'fecha' => Carbon::today()->addDays(1)->toDateString(), 'hora' => '08:00:00'],
+            ['id_doctor' => $docMendez->id_doctor, 'fecha' => Carbon::today()->addDays(1)->toDateString(), 'hora' => '09:00:00'],
+            ['id_doctor' => $docMendez->id_doctor, 'fecha' => Carbon::today()->addDays(1)->toDateString(), 'hora' => '10:00:00'],
+            ['id_doctor' => $docMendez->id_doctor, 'fecha' => Carbon::today()->addDays(2)->toDateString(), 'hora' => '14:00:00'],
+            ['id_doctor' => $docMendez->id_doctor, 'fecha' => Carbon::today()->addDays(2)->toDateString(), 'hora' => '15:00:00'],
+            ['id_doctor' => $docMendez->id_doctor, 'fecha' => Carbon::today()->addDays(3)->toDateString(), 'hora' => '08:30:00'],
+            ['id_doctor' => $docMendez->id_doctor, 'fecha' => Carbon::today()->addDays(3)->toDateString(), 'hora' => '11:00:00'],
+
+            // Dra. Rostova availability slots
+            ['id_doctor' => $docRostova->id_doctor, 'fecha' => Carbon::today()->addDays(1)->toDateString(), 'hora' => '10:30:00'],
+            ['id_doctor' => $docRostova->id_doctor, 'fecha' => Carbon::today()->addDays(1)->toDateString(), 'hora' => '11:30:00'],
+            ['id_doctor' => $docRostova->id_doctor, 'fecha' => Carbon::today()->addDays(2)->toDateString(), 'hora' => '09:00:00'],
+            ['id_doctor' => $docRostova->id_doctor, 'fecha' => Carbon::today()->addDays(2)->toDateString(), 'hora' => '10:00:00'],
+            ['id_doctor' => $docRostova->id_doctor, 'fecha' => Carbon::today()->addDays(3)->toDateString(), 'hora' => '15:30:00'],
+        ];
+
+        foreach ($availabilities as $slot) {
+            \App\Models\DisponibilidadDoctor::create([
+                'id_doctor' => $slot['id_doctor'],
+                'fecha' => $slot['fecha'],
+                'hora' => $slot['hora'],
+                'reservado' => false,
+            ]);
+        }
     }
 }

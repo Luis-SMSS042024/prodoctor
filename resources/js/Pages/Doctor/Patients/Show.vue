@@ -11,15 +11,37 @@ const props = defineProps({
 });
 
 const showDeleteModal = ref(false);
+const activePrintData = ref(null);
 
-// Calculate age from birthdate
+// Print Prescription action
+const printPrescription = (cita, seg) => {
+    activePrintData.value = {
+        paciente: `${props.patient.nombres} ${props.patient.apellidos}`,
+        dui: props.patient.dui,
+        edad: getAge(props.patient.fecha_nacimiento),
+        fecha: new Date(cita.fecha_cita + 'T00:00:00').toLocaleDateString('es-ES', {day: 'numeric', month: 'long', year: 'numeric'}),
+        doctor: cita.doctor ? `${cita.doctor.nombres} ${cita.doctor.apellidos}` : 'Alejandro Ortega',
+        observaciones: seg.observaciones,
+        tratamiento: seg.tratamiento,
+        proxima_revision: seg.proxima_revision ? new Date(seg.proxima_revision + 'T00:00:00').toLocaleDateString('es-ES', {day: 'numeric', month: 'long', year: 'numeric'}) : null
+    };
+    setTimeout(() => {
+        window.print();
+    }, 200);
+};
+
 const getAge = (birthdate) => {
     if (!birthdate) return '';
+    const parts = birthdate.split('-');
+    if (parts.length !== 3) return '';
+    const birthYear = parseInt(parts[0], 10);
+    const birthMonth = parseInt(parts[1], 10);
+    const birthDay = parseInt(parts[2], 10);
+
     const today = new Date();
-    const birth = new Date(birthdate);
-    let age = today.getFullYear() - birth.getFullYear();
-    const m = today.getMonth() - birth.getMonth();
-    if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) {
+    let age = today.getFullYear() - birthYear;
+    const m = (today.getMonth() + 1) - birthMonth;
+    if (m < 0 || (m === 0 && today.getDate() < birthDay)) {
         age--;
     }
     return `${age} años`;
@@ -133,7 +155,7 @@ const getStatusClass = (status) => {
                             </div>
                             <div>
                                 <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wide block">Fecha Nacimiento</span>
-                                <span class="text-sm font-semibold text-slate-700">{{ new Date(patient.fecha_nacimiento).toLocaleDateString('es-ES', {day: 'numeric', month: 'long', year: 'numeric'}) }}</span>
+                                <span class="text-sm font-semibold text-slate-700">{{ new Date(patient.fecha_nacimiento + 'T00:00:00').toLocaleDateString('es-ES', {day: 'numeric', month: 'long', year: 'numeric'}) }}</span>
                             </div>
                             <div>
                                 <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wide block">Edad</span>
@@ -199,7 +221,7 @@ const getStatusClass = (status) => {
                             <div class="divide-y divide-slate-100 overflow-y-auto flex-1 max-h-[350px]">
                                 <div v-for="cita in patient.citas" :key="cita.id_cita" class="p-4 space-y-2 hover:bg-slate-50/50 transition">
                                     <div class="flex items-center justify-between">
-                                        <span class="text-xs font-bold text-slate-550">{{ new Date(cita.fecha_cita).toLocaleDateString('es-ES', {day: 'numeric', month: 'short', year: 'numeric'}) }} - {{ cita.hora_cita.substring(0, 5) }}</span>
+                                        <span class="text-xs font-bold text-slate-550">{{ new Date(cita.fecha_cita + 'T00:00:00').toLocaleDateString('es-ES', {day: 'numeric', month: 'short', year: 'numeric'}) }} - {{ cita.hora_cita.substring(0, 5) }}</span>
                                         <span class="px-2 py-0.5 text-[9px] font-bold rounded-full border" :class="getStatusClass(cita.estado)">{{ cita.estado }}</span>
                                     </div>
                                     <p class="text-xs text-slate-650 font-medium line-clamp-2"><span class="font-bold text-slate-450">Motivo:</span> {{ cita.motivo }}</p>
@@ -214,6 +236,15 @@ const getStatusClass = (status) => {
                                             <p class="text-[11px] text-slate-600 leading-relaxed font-semibold"><span class="text-slate-450 font-extrabold">Observación:</span> {{ seg.observaciones }}</p>
                                             <p class="text-[11px] text-slate-600 leading-relaxed font-semibold"><span class="text-slate-450 font-extrabold">Tratamiento:</span> {{ seg.tratamiento }}</p>
                                             <p v-if="seg.proxima_revision" class="text-[9px] text-indigo-600 font-extrabold">Próxima revisión: {{ new Date(seg.proxima_revision + 'T00:00:00').toLocaleDateString('es-ES', {day: 'numeric', month: 'short', year: 'numeric'}) }}</p>
+                                            <button 
+                                                @click="printPrescription(cita, seg)"
+                                                class="mt-2 text-[10px] font-extrabold text-blue-600 hover:text-blue-700 flex items-center gap-1 cursor-pointer"
+                                            >
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-3.5 h-3.5">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6.72 13.82l-.24-2.22m13.7 2.22l.24-2.22m-13.94 0h13.94M12 3v18m-9-9h18" />
+                                                </svg>
+                                                Imprimir Receta
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
@@ -232,7 +263,7 @@ const getStatusClass = (status) => {
                             <div class="divide-y divide-slate-100 overflow-y-auto flex-1 max-h-[350px]">
                                 <div v-for="proc in patient.procedimientos" :key="proc.id_procedimiento" class="p-4 space-y-2 hover:bg-slate-50/50 transition">
                                     <div class="flex items-center justify-between">
-                                        <span class="text-xs font-bold text-slate-550">{{ new Date(proc.fecha_procedimiento).toLocaleDateString('es-ES', {day: 'numeric', month: 'short', year: 'numeric'}) }}</span>
+                                        <span class="text-xs font-bold text-slate-550">{{ new Date(proc.fecha_procedimiento + 'T00:00:00').toLocaleDateString('es-ES', {day: 'numeric', month: 'short', year: 'numeric'}) }}</span>
                                         <span class="px-2 py-0.5 text-[9px] font-bold rounded-full border" :class="getStatusClass(proc.estado)">{{ proc.estado }}</span>
                                     </div>
                                     <h4 class="text-xs font-bold text-slate-800">{{ proc.nombre_procedimiento }}</h4>
@@ -347,5 +378,92 @@ const getStatusClass = (status) => {
             </div>
 
         </div>
+
+        <!-- Print Prescription Layout (hidden on screen, visible on print) -->
+        <div v-if="activePrintData" id="print-prescription-section" class="hidden print:block fixed inset-0 bg-white p-12 text-slate-800 text-left font-sans z-[999999]">
+            <!-- Letterhead / Membrete -->
+            <div class="flex items-center justify-between border-b-2 border-blue-600 pb-6 mb-8">
+                <div>
+                    <h1 class="text-3xl font-extrabold tracking-tight text-blue-600">ProDoctor</h1>
+                    <p class="text-xs text-slate-400 font-bold uppercase tracking-widest mt-0.5">Gabinete Médico Profesional</p>
+                </div>
+                <div class="text-right text-xs text-slate-500 font-semibold space-y-0.5">
+                    <p>📍 Av. de la Salud #450, Piso 5</p>
+                    <p>📞 +52 (55) 5489-7700</p>
+                    <p>✉️ contacto@prodoctor.com</p>
+                </div>
+            </div>
+
+            <!-- Title -->
+            <div class="text-center mb-8">
+                <h2 class="text-lg font-bold uppercase tracking-wider text-slate-700">Receta Médica y Evolución</h2>
+            </div>
+
+            <!-- Patient / Doctor Info Grid -->
+            <div class="grid grid-cols-2 gap-6 bg-slate-50 border border-slate-200 rounded-xl p-6 mb-8 text-xs">
+                <div>
+                    <p class="text-[10px] font-bold text-slate-400 uppercase">Paciente</p>
+                    <p class="text-sm font-bold text-slate-800 mt-0.5">{{ activePrintData.paciente }}</p>
+                    <p class="text-slate-500 mt-1">DUI: {{ activePrintData.dui || 'No registrado' }} | Edad: {{ activePrintData.edad }}</p>
+                </div>
+                <div>
+                    <p class="text-[10px] font-bold text-slate-400 uppercase">Médico Tratante</p>
+                    <p class="text-sm font-bold text-slate-800 mt-0.5">Dr. {{ activePrintData.doctor }}</p>
+                    <p class="text-slate-500 mt-1">Fecha de Emisión: {{ activePrintData.fecha }}</p>
+                </div>
+            </div>
+
+            <!-- Content -->
+            <div class="space-y-8 min-h-[350px]">
+                <div>
+                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Diagnóstico / Observaciones</h3>
+                    <p class="text-sm text-slate-700 leading-relaxed bg-white border border-slate-200 rounded-xl p-4 min-h-[80px] font-medium">
+                        {{ activePrintData.observaciones }}
+                    </p>
+                </div>
+
+                <div>
+                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Tratamiento y Prescripción Médica</h3>
+                    <p class="text-sm text-slate-700 leading-relaxed bg-white border border-slate-200 rounded-xl p-4 min-h-[120px] whitespace-pre-line font-medium">
+                        {{ activePrintData.tratamiento }}
+                    </p>
+                </div>
+
+                <div v-if="activePrintData.proxima_revision">
+                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Próxima Revisión Programada</h3>
+                    <p class="text-sm text-indigo-700 font-bold bg-indigo-50 border border-indigo-150 rounded-xl p-3.5 w-max">
+                        📅 {{ activePrintData.proxima_revision }}
+                    </p>
+                </div>
+            </div>
+
+            <!-- Signature and stamp -->
+            <div class="mt-20 flex flex-col items-center">
+                <div class="w-64 border-t border-slate-350 text-center pt-3 text-xs font-semibold text-slate-500">
+                    <p class="font-bold text-slate-700">Dr. {{ activePrintData.doctor }}</p>
+                    <p>Firma y Sello Médico</p>
+                </div>
+            </div>
+        </div>
     </AuthenticatedLayout>
 </template>
+
+<style>
+@media print {
+    body * {
+        visibility: hidden !important;
+    }
+    #print-prescription-section,
+    #print-prescription-section * {
+        visibility: visible !important;
+    }
+    #print-prescription-section {
+        position: absolute !important;
+        left: 0 !important;
+        top: 0 !important;
+        width: 100% !important;
+        background: white !important;
+        color: black !important;
+    }
+}
+</style>

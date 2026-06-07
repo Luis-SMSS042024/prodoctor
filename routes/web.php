@@ -6,12 +6,7 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 Route::get('/', function () {
-    return Inertia::render('Welcome', [
-        'canLogin' => Route::has('login'),
-        'canRegister' => Route::has('register'),
-        'laravelVersion' => Application::VERSION,
-        'phpVersion' => PHP_VERSION,
-    ]);
+    return redirect()->route('dashboard');
 });
 
 use App\Http\Controllers\Doctor\DashboardController as DoctorDashboardController;
@@ -63,6 +58,8 @@ Route::middleware(['auth'])->group(function () {
         'appointments' => 'cita'
     ]);
     Route::patch('/doctor/appointments/{cita}/status', [DoctorAppointmentController::class, 'updateStatus'])->name('doctor.appointments.status');
+    Route::post('/doctor/availability', [DoctorAppointmentController::class, 'storeAvailability'])->name('doctor.availability.store');
+    Route::delete('/doctor/availability/{disponibilidad}', [DoctorAppointmentController::class, 'destroyAvailability'])->name('doctor.availability.destroy');
     
     // Procedimientos
     Route::resource('/doctor/procedures', DoctorProcedureController::class)->only([
@@ -93,6 +90,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/paciente/dashboard', [PatientDashboardController::class, 'index'])->name('paciente.dashboard');
     Route::post('/paciente/appointments', [PatientDashboardController::class, 'requestAppointment'])->name('paciente.appointments.store');
     Route::put('/paciente/profile', [PatientDashboardController::class, 'updateProfile'])->name('paciente.profile.update');
+    Route::get('/paciente/doctors/{doctor}/availability', [PatientDashboardController::class, 'getDoctorAvailability'])->name('paciente.doctors.availability');
 
     // Portal de Administrador
     Route::get('/admin/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
@@ -131,6 +129,7 @@ Route::middleware(['auth'])->group(function () {
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::post('/profile/send-otp', [ProfileController::class, 'sendOtp'])->name('profile.send-otp');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 

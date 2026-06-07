@@ -30,14 +30,18 @@ const clearSearch = () => {
     performSearch();
 };
 
-// Calculate age from birthdate
 const getAge = (birthdate) => {
     if (!birthdate) return '';
+    const parts = birthdate.split('-');
+    if (parts.length !== 3) return '';
+    const birthYear = parseInt(parts[0], 10);
+    const birthMonth = parseInt(parts[1], 10);
+    const birthDay = parseInt(parts[2], 10);
+
     const today = new Date();
-    const birth = new Date(birthdate);
-    let age = today.getFullYear() - birth.getFullYear();
-    const m = today.getMonth() - birth.getMonth();
-    if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) {
+    let age = today.getFullYear() - birthYear;
+    const m = (today.getMonth() + 1) - birthMonth;
+    if (m < 0 || (m === 0 && today.getDate() < birthDay)) {
         age--;
     }
     return `${age} años`;

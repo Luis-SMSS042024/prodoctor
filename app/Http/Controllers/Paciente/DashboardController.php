@@ -8,6 +8,7 @@ use App\Models\Cita;
 use App\Models\Doctor;
 use App\Models\Procedimiento;
 use App\Models\SeguimientoClinico;
+use App\Models\DisponibilidadDoctor;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -125,6 +126,8 @@ class DashboardController extends Controller
                 ];
             }),
             'doctores' => $doctores,
+            'mustVerifyEmail' => auth()->user() instanceof \Illuminate\Contracts\Auth\MustVerifyEmail,
+            'status' => session('status'),
         ]);
     }
 
@@ -139,19 +142,63 @@ class DashboardController extends Controller
 
         $paciente = Paciente::where('id_usuario', auth()->user()->id_usuario)->firstOrFail();
 
-        $validated = $request->validate([
+        $request->validate([
             'id_doctor' => 'required|exists:doctores,id_doctor',
-            'fecha_cita' => 'required|date|after_or_equal:today',
-            'hora_cita' => 'required|string',
+            'id_disponibilidad' => 'required|exists:disponibilidades_doctores,id_disponibilidad',
+            'sintomas' => 'nullable|array',
+            'sintomas.*' => 'string',
             'motivo' => 'required|string|max:255',
+        ], [
+            'id_doctor.required' => 'El doctor es obligatorio.',
+            'id_disponibilidad.required' => 'El horario de la cita es obligatorio.',
+            'motivo.required' => 'La descripción de los detalles es obligatoria.',
         ]);
 
-        $validated['id_paciente'] = $paciente->id_paciente;
-        $validated['estado'] = 'Pendiente'; // Requested appointments start as Pendiente
+        // Find the slot and ensure it is not already reserved
+        $slot = DisponibilidadDoctor::where('id_disponibilidad', $request->id_disponibilidad)
+            ->where('id_doctor', $request->id_doctor)
+            ->where('reservado', false)
+            ->firstOrFail();
 
-        Cita::create($validated);
+        // Combine symptoms and description
+        $sintomasStr = !empty($request->sintomas) ? 'Síntomas: ' . implode(', ', $request->sintomas) . '. ' : '';
+        $motivoCompleto = $sintomasStr . 'Detalles: ' . $request->motivo;
 
-        return redirect()->back()->with('success', 'Solicitud de cita médica enviada. Quedará en espera de confirmación.');
+        Cita::create([
+            'id_paciente' => $paciente->id_paciente,
+            'id_doctor' => $request->id_doctor,
+            'fecha_cita' => $slot->fecha,
+            'hora_cita' => $slot->hora,
+            'motivo' => substr($motivoCompleto, 0, 255),
+            'estado' => 'Pendiente',
+        ]);
+
+        // Mark slot as reserved
+        $slot->update(['reservado' => true]);
+
+        return redirect()->back()->with('success', 'Tu cita médica ha sido agendada con éxito.');
+    }
+
+    /**
+     * Get available dates and times for a doctor.
+     */
+    public function getDoctorAvailability(Doctor $doctor): \Illuminate\Http\JsonResponse
+    {
+        $availabilities = DisponibilidadDoctor::where('id_doctor', $doctor->id_doctor)
+            ->where('reservado', false)
+            ->where('fecha', '>=', now()->toDateString())
+            ->orderBy('fecha', 'asc')
+            ->orderBy('hora', 'asc')
+            ->get()
+            ->map(function ($slot) {
+                return [
+                    'id_disponibilidad' => $slot->id_disponibilidad,
+                    'fecha' => $slot->fecha,
+                    'hora' => Carbon::parse($slot->hora)->format('H:i'),
+                ];
+            });
+
+        return response()->json($availabilities);
     }
 
     /**

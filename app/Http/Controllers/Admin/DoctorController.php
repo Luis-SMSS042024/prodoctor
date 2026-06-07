@@ -31,6 +31,7 @@ class DoctorController extends Controller
                     'id_usuario' => $doc->id_usuario,
                     'nombre_usuario' => $doc->usuario ? $doc->usuario->nombre_usuario : '',
                     'correo' => $doc->usuario ? $doc->usuario->correo : '',
+                    'foto' => $doc->usuario ? $doc->usuario->foto : null,
                     'id_especialidad' => $doc->id_especialidad,
                     'nombre_especialidad' => $doc->especialidad ? $doc->especialidad->nombre_especialidad : 'Sin especialidad',
                     'nombres' => $doc->nombres,
@@ -73,6 +74,7 @@ class DoctorController extends Controller
             'apellidos' => 'required|string|max:100',
             'telefono' => 'required|string|max:20',
             'junta_vigilancia' => 'required|string|max:50|unique:doctores,junta_vigilancia',
+            'foto' => 'nullable|image|max:2048',
         ], [
             'nombre_usuario.required' => 'El nombre de usuario es obligatorio.',
             'correo.required' => 'El correo electrónico es obligatorio.',
@@ -85,15 +87,26 @@ class DoctorController extends Controller
             'telefono.required' => 'El teléfono de contacto es obligatorio.',
             'junta_vigilancia.required' => 'El código de Junta de Vigilancia es obligatorio.',
             'junta_vigilancia.unique' => 'Este código de Junta de Vigilancia ya está registrado.',
+            'foto.image' => 'El archivo debe ser una imagen.',
+            'foto.max' => 'La foto no debe pesar más de 2MB.',
         ]);
 
-        // 1. Create associated user
-        $user = User::create([
+        // 1. Create associated user data
+        $userData = [
             'nombre_usuario' => $validated['nombre_usuario'],
             'correo' => $validated['correo'],
             'clave' => Hash::make($validated['clave']),
             'rol' => 'doctor',
-        ]);
+        ];
+
+        if ($request->hasFile('foto')) {
+            $file = $request->file('foto');
+            $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path('uploads/avatars'), $filename);
+            $userData['foto'] = 'uploads/avatars/' . $filename;
+        }
+
+        $user = User::create($userData);
 
         // 2. Create doctor profile
         Doctor::create([
@@ -125,6 +138,7 @@ class DoctorController extends Controller
             'apellidos' => 'required|string|max:100',
             'telefono' => 'required|string|max:20',
             'junta_vigilancia' => 'required|string|max:50|unique:doctores,junta_vigilancia,' . $doctor->id_doctor . ',id_doctor',
+            'foto' => 'nullable|image|max:2048',
         ], [
             'nombre_usuario.required' => 'El nombre de usuario es obligatorio.',
             'correo.required' => 'El correo electrónico es obligatorio.',
@@ -135,15 +149,29 @@ class DoctorController extends Controller
             'telefono.required' => 'El teléfono es obligatorio.',
             'junta_vigilancia.required' => 'El código de Junta de Vigilancia es obligatorio.',
             'junta_vigilancia.unique' => 'Este código de Junta de Vigilancia ya está registrado.',
+            'foto.image' => 'El archivo debe ser una imagen.',
+            'foto.max' => 'La foto no debe pesar más de 2MB.',
         ]);
 
         // 1. Update associated user
         $user = $doctor->usuario;
         if ($user) {
-            $user->update([
+            $userData = [
                 'nombre_usuario' => $validated['nombre_usuario'],
                 'correo' => $validated['correo'],
-            ]);
+            ];
+
+            if ($request->hasFile('foto')) {
+                if ($user->foto && file_exists(public_path($user->foto))) {
+                    @unlink(public_path($user->foto));
+                }
+                $file = $request->file('foto');
+                $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+                $file->move(public_path('uploads/avatars'), $filename);
+                $userData['foto'] = 'uploads/avatars/' . $filename;
+            }
+
+            $user->update($userData);
         }
 
         // 2. Update doctor profile

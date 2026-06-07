@@ -21,6 +21,8 @@ class User extends Authenticatable
         'correo',
         'clave',
         'rol',
+        'foto',
+        'login_2fa',
     ];
 
     protected $hidden = [
@@ -47,6 +49,7 @@ class User extends Authenticatable
     {
         return [
             'clave' => 'hashed',
+            'login_2fa' => 'boolean',
         ];
     }
 

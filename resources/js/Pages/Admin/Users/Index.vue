@@ -37,6 +37,7 @@ const createForm = useForm({
     correo: '',
     clave: '',
     rol: 'paciente',
+    foto: null,
 });
 
 const editForm = useForm({
@@ -44,16 +45,55 @@ const editForm = useForm({
     correo: '',
     rol: '',
     clave: '', // optional password update
+    foto: null,
+    _method: 'PUT',
 });
+
+const createPhotoPreview = ref(null);
+const editPhotoPreview = ref(null);
+const createFileInput = ref(null);
+const editFileInput = ref(null);
+
+const selectCreatePhoto = () => {
+    createFileInput.value.click();
+};
+
+const selectEditPhoto = () => {
+    editFileInput.value.click();
+};
+
+const updateCreatePhotoPreview = () => {
+    const file = createFileInput.value.files[0];
+    if (!file) return;
+    createForm.foto = file;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        createPhotoPreview.value = e.target.result;
+    };
+    reader.readAsDataURL(file);
+};
+
+const updateEditPhotoPreview = () => {
+    const file = editFileInput.value.files[0];
+    if (!file) return;
+    editForm.foto = file;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        editPhotoPreview.value = e.target.result;
+    };
+    reader.readAsDataURL(file);
+};
 
 // Actions
 const openCreateModal = () => {
     createForm.reset();
+    createPhotoPreview.value = null;
     showCreateModal.value = true;
 };
 
 const closeCreateModal = () => {
     showCreateModal.value = false;
+    createPhotoPreview.value = null;
 };
 
 const openEditModal = (userItem) => {
@@ -62,16 +102,20 @@ const openEditModal = (userItem) => {
     editForm.correo = userItem.correo;
     editForm.rol = userItem.rol;
     editForm.clave = ''; // Reset password field in edit
+    editForm.foto = null;
+    editPhotoPreview.value = userItem.foto ? '/' + userItem.foto : null;
     showEditModal.value = true;
 };
 
 const closeEditModal = () => {
     showEditModal.value = false;
+    editPhotoPreview.value = null;
 };
 
 // Form Submits
 const submitCreate = () => {
     createForm.post(route('admin.users.store'), {
+        forceFormData: true,
         onSuccess: () => {
             closeCreateModal();
             createForm.reset();
@@ -80,7 +124,8 @@ const submitCreate = () => {
 };
 
 const submitEdit = () => {
-    editForm.put(route('admin.users.update', selectedUser.value.id_usuario), {
+    editForm.post(route('admin.users.update', selectedUser.value.id_usuario), {
+        forceFormData: true,
         onSuccess: () => {
             closeEditModal();
             selectedUser.value = null;
@@ -196,10 +241,13 @@ const getRoleInitialsClasses = (role) => {
                                 <td class="px-6 py-4 font-bold text-slate-800 text-sm">
                                     <div class="flex items-center gap-3">
                                         <div
-                                            class="w-8 h-8 rounded-full text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-sm"
-                                            :class="getRoleInitialsClasses(userItem.rol)"
+                                            class="w-8 h-8 rounded-full text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-sm overflow-hidden"
+                                            :class="userItem.foto ? '' : getRoleInitialsClasses(userItem.rol)"
                                         >
-                                            {{ userItem.nombre_usuario ? userItem.nombre_usuario.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : 'US' }}
+                                            <img v-if="userItem.foto" :src="'/' + userItem.foto" alt="Avatar" class="w-full h-full object-cover" />
+                                            <span v-else>
+                                                {{ userItem.nombre_usuario ? userItem.nombre_usuario.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : 'US' }}
+                                            </span>
                                         </div>
                                         <div>
                                             <span class="text-slate-800 font-bold block">{{ userItem.nombre_usuario }}</span>
@@ -269,6 +317,39 @@ const getRoleInitialsClasses = (role) => {
 
                     <form @submit.prevent="submitCreate">
                         <div class="p-6 space-y-4">
+                            <!-- Foto de Perfil -->
+                            <div class="space-y-1.5">
+                                <label class="text-xs font-bold text-slate-550 uppercase tracking-wider block">FOTO DE PERFIL</label>
+                                <input
+                                    type="file"
+                                    ref="createFileInput"
+                                    class="hidden"
+                                    accept="image/*"
+                                    @change="updateCreatePhotoPreview"
+                                />
+                                <div class="flex items-center gap-3">
+                                    <div class="relative w-12 h-12 rounded-full overflow-hidden border border-slate-200 bg-slate-50 flex items-center justify-center">
+                                        <img
+                                            v-if="createPhotoPreview"
+                                            :src="createPhotoPreview"
+                                            alt="Avatar"
+                                            class="w-full h-full object-cover"
+                                        />
+                                        <svg v-else xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-slate-400">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75" />
+                                        </svg>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        @click="selectCreatePhoto"
+                                        class="px-3 py-1.5 border border-slate-200 hover:bg-slate-50 rounded-lg text-xs font-bold transition cursor-pointer"
+                                    >
+                                        Subir Foto
+                                    </button>
+                                </div>
+                                <div v-if="createForm.errors.foto" class="text-xs text-rose-600 font-semibold mt-1">{{ createForm.errors.foto }}</div>
+                            </div>
+
                             <!-- Nombre Usuario -->
                             <div class="space-y-1.5">
                                 <label class="text-xs font-bold text-slate-550 uppercase tracking-wider block">NOMBRE DE USUARIO</label>
@@ -362,6 +443,39 @@ const getRoleInitialsClasses = (role) => {
 
                     <form @submit.prevent="submitEdit">
                         <div class="p-6 space-y-4">
+                            <!-- Foto de Perfil -->
+                            <div class="space-y-1.5">
+                                <label class="text-xs font-bold text-slate-550 uppercase tracking-wider block">FOTO DE PERFIL</label>
+                                <input
+                                    type="file"
+                                    ref="editFileInput"
+                                    class="hidden"
+                                    accept="image/*"
+                                    @change="updateEditPhotoPreview"
+                                />
+                                <div class="flex items-center gap-3">
+                                    <div class="relative w-12 h-12 rounded-full overflow-hidden border border-slate-200 bg-slate-50 flex items-center justify-center">
+                                        <img
+                                            v-if="editPhotoPreview"
+                                            :src="editPhotoPreview"
+                                            alt="Avatar"
+                                            class="w-full h-full object-cover"
+                                        />
+                                        <svg v-else xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-slate-400">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75" />
+                                        </svg>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        @click="selectEditPhoto"
+                                        class="px-3 py-1.5 border border-slate-200 hover:bg-slate-50 rounded-lg text-xs font-bold transition cursor-pointer"
+                                    >
+                                        Cambiar Foto
+                                    </button>
+                                </div>
+                                <div v-if="editForm.errors.foto" class="text-xs text-rose-600 font-semibold mt-1">{{ editForm.errors.foto }}</div>
+                            </div>
+
                             <!-- Nombre Usuario -->
                             <div class="space-y-1.5">
                                 <label class="text-xs font-bold text-slate-550 uppercase tracking-wider block">NOMBRE DE USUARIO</label>

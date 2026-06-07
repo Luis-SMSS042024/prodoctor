@@ -18,6 +18,7 @@ class ProfileUpdateRequest extends FormRequest
     {
         return [
             'nombre_usuario' => ['required', 'string', 'max:255'],
+            'foto' => ['nullable', 'image', 'max:2048'],
             'correo' => [
                 'required',
                 'string',
@@ -26,6 +27,7 @@ class ProfileUpdateRequest extends FormRequest
                 'max:255',
                 Rule::unique(User::class, 'correo')->ignore($this->user()->id_usuario, 'id_usuario'),
             ],
+            'login_2fa' => ['nullable', 'boolean'],
         ];
     }
 }

@@ -42,6 +42,7 @@ class UserController extends Controller
             'correo' => 'required|email|max:100|unique:usuarios,correo',
             'clave' => 'required|string|min:6',
             'rol' => 'required|in:doctor,paciente,admin',
+            'foto' => 'nullable|image|max:2048',
         ], [
             'nombre_usuario.required' => 'El nombre de usuario es obligatorio.',
             'correo.required' => 'El correo electrónico es obligatorio.',
@@ -49,14 +50,25 @@ class UserController extends Controller
             'clave.required' => 'La contraseña es obligatoria.',
             'clave.min' => 'La contraseña debe tener al menos 6 caracteres.',
             'rol.required' => 'El rol es obligatorio.',
+            'foto.image' => 'El archivo debe ser una imagen.',
+            'foto.max' => 'La foto no debe pesar más de 2MB.',
         ]);
 
-        User::create([
+        $userData = [
             'nombre_usuario' => $validated['nombre_usuario'],
             'correo' => $validated['correo'],
             'clave' => Hash::make($validated['clave']),
             'rol' => $validated['rol'],
-        ]);
+        ];
+
+        if ($request->hasFile('foto')) {
+            $file = $request->file('foto');
+            $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path('uploads/avatars'), $filename);
+            $userData['foto'] = 'uploads/avatars/' . $filename;
+        }
+
+        User::create($userData);
 
         return redirect()->back()->with('success', 'Usuario registrado exitosamente.');
     }
@@ -80,12 +92,15 @@ class UserController extends Controller
             'correo' => 'required|email|max:100|unique:usuarios,correo,' . $usuario->id_usuario . ',id_usuario',
             'rol' => 'required|in:doctor,paciente,admin',
             'clave' => 'nullable|string|min:6',
+            'foto' => 'nullable|image|max:2048',
         ], [
             'nombre_usuario.required' => 'El nombre de usuario es obligatorio.',
             'correo.required' => 'El correo es obligatorio.',
             'correo.unique' => 'Este correo ya está registrado.',
             'rol.required' => 'El rol es obligatorio.',
             'clave.min' => 'La contraseña nueva debe tener al menos 6 caracteres.',
+            'foto.image' => 'El archivo debe ser una imagen.',
+            'foto.max' => 'La foto no debe pesar más de 2MB.',
         ]);
 
         $data = [
@@ -96,6 +111,17 @@ class UserController extends Controller
 
         if (!empty($validated['clave'])) {
             $data['clave'] = Hash::make($validated['clave']);
+        }
+
+        if ($request->hasFile('foto')) {
+            // Delete old photo if exists
+            if ($usuario->foto && file_exists(public_path($usuario->foto))) {
+                @unlink(public_path($usuario->foto));
+            }
+            $file = $request->file('foto');
+            $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path('uploads/avatars'), $filename);
+            $data['foto'] = 'uploads/avatars/' . $filename;
         }
 
         $usuario->update($data);

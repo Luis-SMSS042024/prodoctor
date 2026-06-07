@@ -7,5 +7,236 @@
 @layer base {
     body {
         font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        background-color: #030914 !important;
+        color: #cbd5e1 !important;
+    }
+
+    /* Custom Webkit Scrollbars for Dark Theme */
+    ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+        background: #030914;
+    }
+    ::-webkit-scrollbar-thumb {
+        background: #162d4a;
+        border-radius: 6px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+        background: #00dfb2;
+    }
+
+    /* Override main background shades */
+    .bg-slate-50, 
+    .bg-gray-50, 
+    .bg-gray-100, 
+    .bg-slate-100, 
+    .bg-slate-200, 
+    .bg-gray-150 {
+        background-color: #030914 !important;
+    }
+
+    /* Cards and container backgrounds */
+    .bg-white {
+        background-color: #07111e !important;
+    }
+
+    .bg-slate-200, .bg-gray-200, .bg-slate-300, .bg-gray-300 {
+        background-color: #0c1a2e !important;
+    }
+
+    /* Input elements */
+    input[type="text"], 
+    input[type="email"], 
+    input[type="password"], 
+    input[type="number"], 
+    input[type="tel"], 
+    input[type="date"], 
+    input[type="time"], 
+    select, 
+    textarea {
+        background-color: #040a12 !important;
+        border-color: #162d4a !important;
+        color: #ffffff !important;
+    }
+
+    input[type="text"]:focus, 
+    input[type="email"]:focus, 
+    input[type="password"]:focus, 
+    input[type="number"]:focus, 
+    input[type="tel"]:focus, 
+    input[type="date"]:focus, 
+    input[type="time"]:focus, 
+    select:focus, 
+    textarea:focus {
+        border-color: #00dfb2 !important;
+        --tw-ring-color: rgba(0, 223, 178, 0.2) !important;
+    }
+
+    input::placeholder, textarea::placeholder {
+        color: #4b5f76 !important;
+    }
+
+    /* Select option colors explicitly set for cross-browser dark compatibility */
+    select option {
+        background-color: #07111e !important;
+        color: #ffffff !important;
+    }
+
+    /* Borders */
+    .border-slate-150,
+    .border-slate-200, 
+    .border-slate-300, 
+    .border-gray-100, 
+    .border-gray-200, 
+    .border-teal-100, 
+    .border-teal-150,
+    .border-teal-200, 
+    .border-blue-100, 
+    .border-blue-200 {
+        border-color: #13283f !important;
+    }
+
+    /* General Text Color Overrides to make all text readable on dark backgrounds */
+    .text-slate-800, 
+    .text-slate-700, 
+    .text-slate-900, 
+    .text-slate-950,
+    .text-slate-650, 
+    .text-gray-900, 
+    .text-gray-800, 
+    .text-gray-950,
+    .text-black,
+    .text-slate-850 {
+        color: #f1f5f9 !important;
+    }
+
+    .text-slate-600, 
+    .text-slate-550,
+    .text-slate-505,
+    .text-slate-500, 
+    .text-slate-400, 
+    .text-gray-655,
+    .text-gray-650, 
+    .text-gray-600, 
+    .text-gray-500 {
+        color: #8fa0b5 !important;
+    }
+
+    /* Primary buttons & markers overrides (Fuchsia/Teal/Blue ➔ Emerald/Teal green) */
+    .bg-blue-600, 
+    .bg-teal-600, 
+    .bg-fuchsia-600, 
+    .bg-indigo-600, 
+    .bg-emerald-600,
+    .bg-blue-500,
+    .bg-teal-500,
+    .bg-fuchsia-500,
+    .bg-emerald-500 {
+        background-image: linear-gradient(to right, #00dfb2, #00a887) !important;
+        color: #030914 !important;
+        font-weight: 800 !important;
+        border: none !important;
+    }
+
+    .bg-blue-600:hover, 
+    .bg-teal-600:hover, 
+    .bg-fuchsia-600:hover, 
+    .bg-indigo-600:hover, 
+    .bg-emerald-600:hover,
+    .bg-blue-500:hover,
+    .bg-teal-500:hover,
+    .bg-fuchsia-500:hover,
+    .bg-emerald-500:hover {
+        background-image: linear-gradient(to right, #00ffd5, #00c79f) !important;
+        color: #030914 !important;
+    }
+
+    .text-blue-600, 
+    .text-teal-600, 
+    .text-fuchsia-600, 
+    .text-teal-650 {
+        color: #00dfb2 !important;
+    }
+
+    .text-blue-600:hover, 
+    .text-teal-600:hover, 
+    .text-fuchsia-600:hover,
+    .text-blue-500:hover,
+    .text-teal-500:hover {
+        color: #00ffd5 !important;
+    }
+
+    .border-blue-500, 
+    .border-teal-500, 
+    .border-fuchsia-500 {
+        border-color: #00dfb2 !important;
+    }
+
+    .bg-blue-55,
+    .bg-blue-50, 
+    .bg-teal-50, 
+    .bg-fuchsia-50, 
+    .bg-emerald-50 {
+        background-color: rgba(0, 223, 178, 0.08) !important;
+        border-color: rgba(0, 223, 178, 0.15) !important;
+        color: #00dfb2 !important;
+    }
+
+    .text-blue-500, 
+    .text-teal-500, 
+    .text-fuchsia-500 {
+        color: #00dfb2 !important;
+    }
+
+    /* Table styling */
+    .divide-slate-200 > :not([hidden]) ~ :not([hidden]) {
+        border-color: #13283f !important;
+    }
+
+    thead.bg-slate-50, thead.bg-gray-50 {
+        background-color: #0c1a2e !important;
+    }
+
+    tr:hover {
+        background-color: rgba(4, 12, 24, 0.3) !important;
+    }
+
+    /* Modal dialog overrides */
+    .bg-white.rounded-2xl, 
+    .bg-white.rounded-lg {
+        background-color: #07111e !important;
+        border: 1px solid #13283f !important;
+    }
+
+    /* Dropdowns overrides */
+    .bg-white.ring-1.ring-black.ring-opacity-5 {
+        background-color: #07111e !important;
+        border: 1px solid #13283f !important;
+    }
+
+    /* Handle Tailwind opacity background classes on dark theme */
+    [class*="bg-blue-50/"], 
+    [class*="bg-teal-50/"], 
+    [class*="bg-emerald-50/"],
+    [class*="bg-slate-50/"] {
+        background-color: rgba(0, 223, 178, 0.08) !important;
+        border-color: rgba(0, 223, 178, 0.15) !important;
+        color: #00dfb2 !important;
+    }
+
+    [class*="bg-rose-50/"] {
+        background-color: rgba(239, 68, 68, 0.08) !important;
+        border-color: rgba(239, 68, 68, 0.15) !important;
+        color: #f87171 !important;
+    }
+
+    /* Fix table row hover styles */
+    [class*="hover:bg-slate-50/"] {
+        background-color: transparent !important;
+    }
+    tr:hover {
+        background-color: rgba(12, 26, 46, 0.4) !important;
     }
 }

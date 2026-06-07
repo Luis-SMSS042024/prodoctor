@@ -12,7 +12,62 @@ const props = defineProps({
         type: Array,
         required: true,
     },
+    availabilities: {
+        type: Array,
+        default: () => [],
+    },
 });
+
+// Availability form and logic
+const availabilityForm = useForm({
+    fecha: '',
+    horas: [],
+});
+
+// Initialize date to today's date string
+const getTodayDateString = () => {
+    const today = new Date();
+    const y = today.getFullYear();
+    const m = String(today.getMonth() + 1).padStart(2, '0');
+    const d = String(today.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+};
+availabilityForm.fecha = getTodayDateString();
+
+const presetHours = [
+    '08:00', '08:30', '09:00', '09:30', '10:00', '10:30', '11:00', '11:30',
+    '13:00', '13:30', '14:00', '14:30', '15:00', '15:30', '16:00', '16:30', '17:00'
+];
+
+const toggleHour = (hour) => {
+    const index = availabilityForm.horas.indexOf(hour);
+    if (index > -1) {
+        availabilityForm.horas.splice(index, 1);
+    } else {
+        availabilityForm.horas.push(hour);
+    }
+};
+
+const submitAvailability = () => {
+    if (availabilityForm.horas.length === 0) {
+        alert('Por favor selecciona al menos un horario.');
+        return;
+    }
+    availabilityForm.post(route('doctor.availability.store'), {
+        preserveScroll: true,
+        onSuccess: () => {
+            availabilityForm.horas = [];
+        }
+    });
+};
+
+const deleteAvailability = (id) => {
+    if (confirm('¿Estás seguro de que deseas retirar este horario disponible?')) {
+        router.delete(route('doctor.availability.destroy', id), {
+            preserveScroll: true
+        });
+    }
+};
 
 // View Toggle: 'week' or 'month'
 const selectedView = ref('week');
@@ -376,8 +431,8 @@ const deleteAppointment = () => {
             
             <!-- Barra de Controles del Calendario -->
             <div class="bg-white rounded-xl border border-slate-200 p-4 flex flex-col md:flex-row items-center justify-between gap-4 shadow-sm">
-                <!-- Selector de Vista (Semanal/Mensual) -->
-                <div class="flex bg-slate-100 p-1 rounded-xl w-full md:w-auto">
+                <!-- Selector de Vista (Semanal/Mensual/Disponibilidad) -->
+                <div class="flex bg-slate-100 p-1 rounded-xl w-full md:w-auto flex-wrap gap-1">
                     <button
                         @click="selectedView = 'week'"
                         class="flex-1 md:flex-none px-4 py-2 rounded-lg text-xs font-bold transition duration-150 cursor-pointer"
@@ -392,10 +447,17 @@ const deleteAppointment = () => {
                     >
                         Vista Mensual
                     </button>
+                    <button
+                        @click="selectedView = 'availability'"
+                        class="flex-1 md:flex-none px-4 py-2 rounded-lg text-xs font-bold transition duration-150 cursor-pointer whitespace-nowrap"
+                        :class="selectedView === 'availability' ? 'bg-white text-blue-700 shadow-sm' : 'text-slate-550 hover:text-slate-800'"
+                    >
+                        Poner Libre (Disponibilidad)
+                    </button>
                 </div>
 
                 <!-- Controles de Navegación del Calendario -->
-                <div class="flex items-center gap-3 w-full md:w-auto justify-between md:justify-end">
+                <div v-if="selectedView !== 'availability'" class="flex items-center gap-3 w-full md:w-auto justify-between md:justify-end">
                     <div class="flex items-center gap-1.5">
                         <button
                             @click="navigatePrev"
@@ -501,7 +563,7 @@ const deleteAppointment = () => {
             </div>
 
             <!-- VISTA MENSUAL -->
-            <div v-else class="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+            <div v-else-if="selectedView === 'month'" class="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
                 <!-- Nombres de Días de la semana -->
                 <div class="grid grid-cols-7 border-b border-slate-200 bg-slate-50 text-center py-2.5">
                     <div
@@ -531,7 +593,7 @@ const deleteAppointment = () => {
                                 :class="[
                                     isToday(cell.date) ? 'bg-blue-600 text-white shadow-sm shadow-blue-500/20' : 'text-slate-700',
                                     !cell.isCurrentMonth ? 'text-slate-350' : ''
-                                ]"
+                                    ]"
                             >
                                 {{ cell.date.getDate() }}
                             </span>
@@ -569,6 +631,116 @@ const deleteAppointment = () => {
                                 +{{ getAppointmentsForDate(cell.date).length - 3 }} más
                             </div>
                         </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- GESTIONAR DISPONIBILIDAD -->
+            <div v-else-if="selectedView === 'availability'" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Columna Izquierda: Añadir Horarios -->
+                <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-4">
+                    <div>
+                        <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wide">Poner Horarios Libres</h3>
+                        <p class="text-xs text-slate-400 mt-1">Selecciona una fecha y marca los horarios que deseas habilitar para citas de pacientes.</p>
+                    </div>
+
+                    <form @submit.prevent="submitAvailability" class="space-y-4">
+                        <!-- Fecha -->
+                        <div class="space-y-1.5">
+                            <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wide block">Fecha de Disponibilidad</label>
+                            <input
+                                type="date"
+                                v-model="availabilityForm.fecha"
+                                :min="getTodayDateString()"
+                                required
+                                class="block w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 text-xs focus:outline-none focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition"
+                            />
+                            <div v-if="availabilityForm.errors.fecha" class="text-[10px] text-rose-500 font-semibold">{{ availabilityForm.errors.fecha }}</div>
+                        </div>
+
+                        <!-- Horas Grid -->
+                        <div class="space-y-1.5">
+                            <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wide block">Selecciona las Horas</label>
+                            <div class="grid grid-cols-3 gap-2">
+                                <button
+                                    v-for="hour in presetHours"
+                                    :key="hour"
+                                    type="button"
+                                    @click="toggleHour(hour)"
+                                    class="py-2 rounded-lg text-xs font-bold border transition duration-150 cursor-pointer text-center"
+                                    :class="availabilityForm.horas.includes(hour)
+                                        ? 'bg-blue-600 text-white border-blue-500 shadow-sm'
+                                        : 'bg-slate-50 border-slate-200 text-slate-700 hover:border-slate-400'"
+                                >
+                                    {{ hour }}
+                                </button>
+                            </div>
+                            <div v-if="availabilityForm.errors.horas" class="text-[10px] text-rose-500 font-semibold">{{ availabilityForm.errors.horas }}</div>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <button
+                            type="submit"
+                            :disabled="availabilityForm.processing || availabilityForm.horas.length === 0"
+                            class="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-650 hover:from-blue-700 hover:to-indigo-755 text-white rounded-xl text-xs font-bold shadow-md shadow-blue-500/15 active:scale-[0.98] transition cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            Habilitar Horarios Seleccionados
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Columna Derecha: Horarios Existentes (2 Cols ancho) -->
+                <div class="lg:col-span-2 bg-white rounded-xl border border-slate-200 p-6 shadow-sm flex flex-col min-h-[400px]">
+                    <div class="border-b border-slate-150 pb-3 mb-4">
+                        <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wide">Mis Horarios Habilitados</h3>
+                        <p class="text-xs text-slate-400 mt-1">Lista de fechas y horas disponibles. No se pueden eliminar horarios que ya estén reservados.</p>
+                    </div>
+
+                    <div class="flex-1 overflow-y-auto max-h-[450px]">
+                        <table class="w-full text-left border-collapse text-xs">
+                            <thead>
+                                <tr class="bg-slate-50 border-b border-slate-200 text-slate-400">
+                                    <th class="px-4 py-3 font-bold uppercase tracking-wider">Fecha</th>
+                                    <th class="px-4 py-3 font-bold uppercase tracking-wider">Hora</th>
+                                    <th class="px-4 py-3 font-bold uppercase tracking-wider">Estado</th>
+                                    <th class="px-4 py-3 font-bold uppercase tracking-wider text-right">Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-150">
+                                <tr v-for="slot in availabilities" :key="slot.id_disponibilidad" class="hover:bg-slate-50/50 transition">
+                                    <td class="px-4 py-3 font-bold text-slate-700">
+                                        {{ new Date(slot.fecha + 'T00:00:00').toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' }) }}
+                                    </td>
+                                    <td class="px-4 py-3 font-semibold text-slate-600">{{ slot.hora }} hrs</td>
+                                    <td class="px-4 py-3">
+                                        <span
+                                            class="px-2 py-0.5 rounded-full text-[9px] font-black uppercase border"
+                                            :class="slot.reservado 
+                                                ? 'bg-blue-50 text-blue-700 border-blue-200' 
+                                                : 'bg-emerald-50 text-emerald-700 border-emerald-200'"
+                                        >
+                                            {{ slot.reservado ? 'Reservado' : 'Disponible' }}
+                                        </span>
+                                    </td>
+                                    <td class="px-4 py-3 text-right">
+                                        <button
+                                            v-if="!slot.reservado"
+                                            @click="deleteAvailability(slot.id_disponibilidad)"
+                                            class="p-1.5 bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-600 rounded-lg hover:text-rose-700 transition cursor-pointer inline-flex items-center"
+                                            title="Retirar horario"
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                                            </svg>
+                                        </button>
+                                        <span v-else class="text-[10px] text-slate-400 font-bold italic">En cita</span>
+                                    </td>
+                                </tr>
+                                <tr v-if="availabilities.length === 0">
+                                    <td colspan="4" class="px-4 py-8 text-center text-slate-500 font-medium">No has registrado horarios libres todavía.</td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>

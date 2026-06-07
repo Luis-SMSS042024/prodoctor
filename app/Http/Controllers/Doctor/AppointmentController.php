@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Cita;
 use App\Models\Paciente;
 use App\Models\Doctor;
+use App\Models\DisponibilidadDoctor;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -53,9 +54,28 @@ class AppointmentController extends Controller
                 ];
             });
 
+        // Fetch availability slots for current doctor
+        $doctor = Doctor::where('id_usuario', auth()->user()->id_usuario)->first();
+        $availabilities = [];
+        if ($doctor) {
+            $availabilities = DisponibilidadDoctor::where('id_doctor', $doctor->id_doctor)
+                ->orderBy('fecha', 'asc')
+                ->orderBy('hora', 'asc')
+                ->get()
+                ->map(function ($slot) {
+                    return [
+                        'id_disponibilidad' => $slot->id_disponibilidad,
+                        'fecha' => $slot->fecha,
+                        'hora' => Carbon::parse($slot->hora)->format('H:i'),
+                        'reservado' => (bool)$slot->reservado,
+                    ];
+                });
+        }
+
         return Inertia::render('Doctor/Appointments/Index', [
             'appointments' => $appointments,
             'patients' => $patients,
+            'availabilities' => $availabilities,
         ]);
     }
 
@@ -148,5 +168,69 @@ class AppointmentController extends Controller
         $cita->delete();
 
         return redirect()->back()->with('success', 'Cita eliminada de la agenda.');
+    }
+
+    /**
+     * Store new availability slots for the doctor.
+     */
+    public function storeAvailability(Request $request): RedirectResponse
+    {
+        if (auth()->user()->rol !== 'doctor') {
+            abort(403, 'Acceso no autorizado.');
+        }
+
+        $doctor = Doctor::where('id_usuario', auth()->user()->id_usuario)->firstOrFail();
+
+        $request->validate([
+            'fecha' => 'required|date|after_or_equal:today',
+            'horas' => 'required|array',
+            'horas.*' => 'string',
+        ], [
+            'fecha.required' => 'La fecha es obligatoria.',
+            'fecha.after_or_equal' => 'La fecha debe ser hoy o posterior.',
+            'horas.required' => 'Debes seleccionar al menos una hora.',
+        ]);
+
+        foreach ($request->horas as $hora) {
+            $exists = DisponibilidadDoctor::where('id_doctor', $doctor->id_doctor)
+                ->where('fecha', $request->fecha)
+                ->where('hora', $hora)
+                ->exists();
+
+            if (!$exists) {
+                DisponibilidadDoctor::create([
+                    'id_doctor' => $doctor->id_doctor,
+                    'fecha' => $request->fecha,
+                    'hora' => $hora,
+                    'reservado' => false,
+                ]);
+            }
+        }
+
+        return redirect()->back()->with('success', 'Horarios de disponibilidad agregados exitosamente.');
+    }
+
+    /**
+     * Delete an availability slot.
+     */
+    public function destroyAvailability($id): RedirectResponse
+    {
+        if (auth()->user()->rol !== 'doctor') {
+            abort(403, 'Acceso no autorizado.');
+        }
+
+        $doctor = Doctor::where('id_usuario', auth()->user()->id_usuario)->firstOrFail();
+
+        $slot = DisponibilidadDoctor::where('id_disponibilidad', $id)
+            ->where('id_doctor', $doctor->id_doctor)
+            ->firstOrFail();
+
+        if ($slot->reservado) {
+            return redirect()->back()->withErrors(['error' => 'No se puede eliminar un horario que ya está reservado por un paciente.']);
+        }
+
+        $slot->delete();
+
+        return redirect()->back()->with('success', 'Horario de disponibilidad eliminado.');
     }
 }

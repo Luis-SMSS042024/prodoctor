@@ -44,6 +44,7 @@ const createForm = useForm({
     apellidos: '',
     telefono: '',
     junta_vigilancia: '',
+    foto: null,
 });
 
 const editForm = useForm({
@@ -54,16 +55,55 @@ const editForm = useForm({
     apellidos: '',
     telefono: '',
     junta_vigilancia: '',
+    foto: null,
+    _method: 'PUT',
 });
+
+const createPhotoPreview = ref(null);
+const editPhotoPreview = ref(null);
+const createFileInput = ref(null);
+const editFileInput = ref(null);
+
+const selectCreatePhoto = () => {
+    createFileInput.value.click();
+};
+
+const selectEditPhoto = () => {
+    editFileInput.value.click();
+};
+
+const updateCreatePhotoPreview = () => {
+    const file = createFileInput.value.files[0];
+    if (!file) return;
+    createForm.foto = file;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        createPhotoPreview.value = e.target.result;
+    };
+    reader.readAsDataURL(file);
+};
+
+const updateEditPhotoPreview = () => {
+    const file = editFileInput.value.files[0];
+    if (!file) return;
+    editForm.foto = file;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        editPhotoPreview.value = e.target.result;
+    };
+    reader.readAsDataURL(file);
+};
 
 // Actions
 const openCreateModal = () => {
     createForm.reset();
+    createPhotoPreview.value = null;
     showCreateModal.value = true;
 };
 
 const closeCreateModal = () => {
     showCreateModal.value = false;
+    createPhotoPreview.value = null;
 };
 
 const openEditModal = (doc) => {
@@ -75,16 +115,20 @@ const openEditModal = (doc) => {
     editForm.apellidos = doc.apellidos;
     editForm.telefono = doc.telefono;
     editForm.junta_vigilancia = doc.junta_vigilancia;
+    editForm.foto = null;
+    editPhotoPreview.value = doc.foto ? '/' + doc.foto : null;
     showEditModal.value = true;
 };
 
 const closeEditModal = () => {
     showEditModal.value = false;
+    editPhotoPreview.value = null;
 };
 
 // Submits
 const submitCreate = () => {
     createForm.post(route('admin.doctors.store'), {
+        forceFormData: true,
         onSuccess: () => {
             closeCreateModal();
             createForm.reset();
@@ -93,7 +137,8 @@ const submitCreate = () => {
 };
 
 const submitEdit = () => {
-    editForm.put(route('admin.doctors.update', selectedDoctor.value.id_doctor), {
+    editForm.post(route('admin.doctors.update', selectedDoctor.value.id_doctor), {
+        forceFormData: true,
         onSuccess: () => {
             closeEditModal();
             selectedDoctor.value = null;
@@ -172,7 +217,20 @@ const deleteDoctor = (doc) => {
                             <tr v-for="doc in filteredDoctors" :key="doc.id_doctor" class="hover:bg-slate-50/50 transition">
                                 <!-- Nombre -->
                                 <td class="px-6 py-4 font-bold text-slate-800 text-sm">
-                                    Dr. {{ doc.nombres }} {{ doc.apellidos }}
+                                    <div class="flex items-center gap-3">
+                                        <div
+                                            class="w-8 h-8 rounded-full text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-sm overflow-hidden"
+                                            :class="doc.foto ? '' : 'bg-gradient-to-tr from-blue-500 to-indigo-500'"
+                                        >
+                                            <img v-if="doc.foto" :src="'/' + doc.foto" alt="Avatar" class="w-full h-full object-cover" />
+                                            <span v-else>
+                                                {{ doc.nombres ? doc.nombres[0] + (doc.apellidos ? doc.apellidos[0] : '') : 'DR' }}
+                                            </span>
+                                        </div>
+                                        <div>
+                                            <span class="block">Dr. {{ doc.nombres }} {{ doc.apellidos }}</span>
+                                        </div>
+                                    </div>
                                 </td>
                                 <!-- Especialidad -->
                                 <td class="px-6 py-4">
@@ -240,6 +298,39 @@ const deleteDoctor = (doc) => {
 
                     <form @submit.prevent="submitCreate">
                         <div class="p-6 space-y-4 max-h-[420px] overflow-y-auto">
+                            <!-- Foto de Perfil -->
+                            <div class="space-y-1">
+                                <label class="text-[10px] font-bold text-slate-455 uppercase block">FOTO DE PERFIL</label>
+                                <input
+                                    type="file"
+                                    ref="createFileInput"
+                                    class="hidden"
+                                    accept="image/*"
+                                    @change="updateCreatePhotoPreview"
+                                />
+                                <div class="flex items-center gap-3">
+                                    <div class="relative w-12 h-12 rounded-full overflow-hidden border border-slate-200 bg-slate-50 flex items-center justify-center">
+                                        <img
+                                            v-if="createPhotoPreview"
+                                            :src="createPhotoPreview"
+                                            alt="Avatar"
+                                            class="w-full h-full object-cover"
+                                        />
+                                        <svg v-else xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-slate-400">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75" />
+                                        </svg>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        @click="selectCreatePhoto"
+                                        class="px-3 py-1.5 border border-slate-200 hover:bg-slate-50 rounded-lg text-xs font-bold transition cursor-pointer"
+                                    >
+                                        Subir Foto
+                                    </button>
+                                </div>
+                                <div v-if="createForm.errors.foto" class="text-[10px] text-rose-600 font-semibold">{{ createForm.errors.foto }}</div>
+                            </div>
+
                             <!-- SECCIÓN: DATOS DE ACCESO -->
                             <div class="border-b border-slate-100 pb-2">
                                 <h4 class="text-xs font-black text-fuchsia-700 uppercase tracking-wider">1. Cuenta de Acceso</h4>
@@ -385,6 +476,39 @@ const deleteDoctor = (doc) => {
 
                     <form @submit.prevent="submitEdit">
                         <div class="p-6 space-y-4 max-h-[420px] overflow-y-auto">
+                            <!-- Foto de Perfil -->
+                            <div class="space-y-1">
+                                <label class="text-[10px] font-bold text-slate-455 uppercase block">FOTO DE PERFIL</label>
+                                <input
+                                    type="file"
+                                    ref="editFileInput"
+                                    class="hidden"
+                                    accept="image/*"
+                                    @change="updateEditPhotoPreview"
+                                />
+                                <div class="flex items-center gap-3">
+                                    <div class="relative w-12 h-12 rounded-full overflow-hidden border border-slate-200 bg-slate-50 flex items-center justify-center">
+                                        <img
+                                            v-if="editPhotoPreview"
+                                            :src="editPhotoPreview"
+                                            alt="Avatar"
+                                            class="w-full h-full object-cover"
+                                        />
+                                        <svg v-else xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-slate-400">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75" />
+                                        </svg>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        @click="selectEditPhoto"
+                                        class="px-3 py-1.5 border border-slate-200 hover:bg-slate-50 rounded-lg text-xs font-bold transition cursor-pointer"
+                                    >
+                                        Cambiar Foto
+                                    </button>
+                                </div>
+                                <div v-if="editForm.errors.foto" class="text-[10px] text-rose-600 font-semibold">{{ editForm.errors.foto }}</div>
+                            </div>
+
                             <!-- CUENTA ACCESO -->
                             <div class="border-b border-slate-100 pb-2">
                                 <h4 class="text-xs font-black text-fuchsia-700 uppercase tracking-wider">1. Cuenta de Acceso</h4>

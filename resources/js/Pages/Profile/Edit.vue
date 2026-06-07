@@ -16,40 +16,34 @@ defineProps({
 </script>
 
 <template>
-    <Head title="Profile" />
+    <Head title="Mi Perfil - ProDoctor" />
 
     <AuthenticatedLayout>
         <template #header>
-            <h2
-                class="text-xl font-semibold leading-tight text-gray-800"
-            >
-                Profile
-            </h2>
+            <div>
+                <h2 class="text-xl font-extrabold text-[#00dfb2] tracking-tight">Mi Perfil y Ajustes</h2>
+                <p class="text-xs text-slate-400 mt-0.5">Administra tus datos personales, foto de perfil y seguridad de la cuenta.</p>
+            </div>
         </template>
 
-        <div class="py-12">
-            <div class="mx-auto max-w-7xl space-y-6 sm:px-6 lg:px-8">
-                <div
-                    class="bg-white p-4 shadow sm:rounded-lg sm:p-8"
-                >
-                    <UpdateProfileInformationForm
-                        :must-verify-email="mustVerifyEmail"
-                        :status="status"
-                        class="max-w-xl"
-                    />
-                </div>
+        <div class="py-6 space-y-6 max-w-4xl mx-auto select-none">
+            <!-- Sección: Datos del Perfil -->
+            <div class="bg-[#07111e] border border-[#13283f] p-8 shadow-lg rounded-2xl">
+                <UpdateProfileInformationForm
+                    :must-verify-email="mustVerifyEmail"
+                    :status="status"
+                    class="w-full"
+                />
+            </div>
 
-                <div
-                    class="bg-white p-4 shadow sm:rounded-lg sm:p-8"
-                >
-                    <UpdatePasswordForm class="max-w-xl" />
-                </div>
+            <!-- Sección: Cambiar Contraseña -->
+            <div class="bg-[#07111e] border border-[#13283f] p-8 shadow-lg rounded-2xl">
+                <UpdatePasswordForm class="w-full" />
+            </div>
 
-                <div
-                    class="bg-white p-4 shadow sm:rounded-lg sm:p-8"
-                >
-                    <DeleteUserForm class="max-w-xl" />
-                </div>
+            <!-- Sección: Eliminar Cuenta -->
+            <div class="bg-[#07111e]/60 border border-[#2a131a]/80 p-8 shadow-lg rounded-2xl">
+                <DeleteUserForm class="w-full" />
             </div>
         </div>
     </AuthenticatedLayout>
