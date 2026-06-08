@@ -497,19 +497,19 @@ const deleteAppointment = () => {
                 <div
                     v-for="day in weekDays"
                     :key="day.getTime()"
-                    class="bg-white rounded-xl border border-slate-200 flex flex-col min-h-[380px] shadow-sm transition"
-                    :class="isToday(day) ? 'ring-2 ring-blue-500 ring-offset-1 bg-gradient-to-b from-blue-50/10 to-white' : ''"
+                    class="rounded-xl border flex flex-col min-h-[380px] shadow-sm transition"
+                    :class="isToday(day) ? 'ring-2 ring-blue-500 bg-blue-50/45 border-transparent' : 'bg-white border-slate-200'"
                 >
                     <!-- Cabecera de la columna (Día) -->
                     <div
                         class="p-3 border-b border-slate-150 flex items-center justify-between"
-                        :class="isToday(day) ? 'bg-blue-600/5' : 'bg-slate-50/50'"
+                        :class="isToday(day) ? 'bg-blue-600/10' : 'bg-slate-50/50'"
                     >
                         <div>
-                            <span class="text-xs font-extrabold block" :class="isToday(day) ? 'text-blue-600' : 'text-slate-700'">
+                            <span class="text-xs font-extrabold block" :class="isToday(day) ? 'text-blue-800' : 'text-slate-700'">
                                 {{ formatDayHeader(day).split(' ')[0] }}
                             </span>
-                            <span class="text-[10px] font-bold text-slate-400">
+                            <span class="text-[10px] font-bold" :class="isToday(day) ? 'text-blue-600' : 'text-slate-400'">
                                 {{ day.getDate() }} {{ monthNames[day.getMonth()].substring(0, 3) }}
                             </span>
                         </div>
@@ -582,8 +582,9 @@ const deleteAppointment = () => {
                         :key="index"
                         class="min-h-[110px] p-2 flex flex-col group relative"
                         :class="[
-                            cell.isCurrentMonth ? 'bg-white' : 'bg-slate-50/50 text-slate-400',
-                            isToday(cell.date) ? 'bg-blue-50/15' : ''
+                            cell.isCurrentMonth 
+                                ? (isToday(cell.date) ? 'bg-blue-50/40 ring-1 ring-blue-500 ring-inset' : 'bg-white') 
+                                : (isToday(cell.date) ? 'bg-blue-50/20 ring-1 ring-blue-400 ring-inset text-slate-500' : 'bg-slate-50/50 text-slate-400')
                         ]"
                     >
                         <!-- Número del Día -->

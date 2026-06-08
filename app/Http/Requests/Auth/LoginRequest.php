@@ -32,7 +32,6 @@ class LoginRequest extends FormRequest
         return [
             'correo' => ['required', 'string', 'email'],
             'contrasena' => ['required', 'string'],
-            'rol' => ['required', 'string', 'in:doctor,paciente'],
         ];
     }
 
@@ -44,15 +43,6 @@ class LoginRequest extends FormRequest
     public function authenticate(): void
     {
         $this->ensureIsNotRateLimited();
-
-        // Verificar coincidencia de rol antes de intentar login
-        $user = User::where('correo', $this->correo)->first();
-        if ($user && $user->rol !== $this->rol && $user->rol !== 'admin') {
-            RateLimiter::hit($this->throttleKey());
-            throw ValidationException::withMessages([
-                'correo' => 'El rol seleccionado no coincide con tu tipo de cuenta.',
-            ]);
-        }
 
         if (! Auth::attempt([
             'correo' => $this->correo,

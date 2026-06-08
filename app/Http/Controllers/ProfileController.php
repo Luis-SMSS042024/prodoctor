@@ -75,7 +75,7 @@ class ProfileController extends Controller
         $user->fill($data);
         $user->save();
 
-        return Redirect::route('profile.edit');
+        return back();
     }
 
     /**

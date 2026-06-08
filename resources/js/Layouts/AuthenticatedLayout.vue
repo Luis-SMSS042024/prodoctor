@@ -127,19 +127,21 @@ const isRouteActive = (pattern) => {
                 </Link>
 
                 <!-- Dashboard Paciente -->
-                <Link
-                    v-if="user.rol === 'paciente'"
-                    :href="route('dashboard')"
-                    class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition duration-150"
-                    :class="isRouteActive('dashboard')
-                        ? 'bg-emerald-500/10 text-[#00dfb2] border-l-4 border-[#00dfb2]'
-                        : 'text-slate-400 hover:bg-[#040a12] hover:text-white'"
-                >
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
-                    </svg>
-                    Mi Portal Médico
-                </Link>
+                <div v-if="user.rol === 'paciente'" class="space-y-1">
+                    <Link
+                        :href="route('dashboard')"
+                        class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition duration-150"
+                        :class="isRouteActive('dashboard')
+                            ? 'bg-emerald-500/10 text-[#00dfb2] border-l-4 border-[#00dfb2]'
+                            : 'text-slate-400 hover:bg-[#040a12] hover:text-white'"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
+                        </svg>
+                        Mi Portal Médico
+                    </Link>
+                    <slot name="sidebar-paciente" />
+                </div>
 
                 <!-- Dashboard Admin -->
                 <Link
@@ -304,7 +306,7 @@ const isRouteActive = (pattern) => {
             </transition>
 
             <!-- Header superior -->
-            <header class="h-16 bg-[#07111e] border-b border-[#13283f] px-8 flex items-center justify-between flex-shrink-0 shadow-sm z-10">
+            <header class="min-h-[4rem] py-3 bg-[#07111e] border-b border-[#13283f] px-8 flex items-center justify-between flex-shrink-0 shadow-sm z-30">
                 <div class="flex-1 mr-6">
                     <slot name="header" />
                 </div>

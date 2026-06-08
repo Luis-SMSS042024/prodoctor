@@ -19,6 +19,10 @@ const otpMessage = ref('');
 const devOtp = ref('');
 const isSendingOtp = ref(false);
 
+const showCurrentPassword = ref(false);
+const showNewPassword = ref(false);
+const showConfirmNewPassword = ref(false);
+
 const sendOtp = () => {
     isSendingOtp.value = true;
     axios.post(route('profile.send-otp'), { type: 'password' })
@@ -75,47 +79,92 @@ const updatePassword = () => {
             <!-- Contraseña Actual -->
             <div class="space-y-1.5">
                 <label for="contrasena_actual" class="text-[10px] font-bold text-[#00dfb2] uppercase tracking-widest block">Contraseña Actual</label>
-                <input
-                    id="contrasena_actual"
-                    ref="currentPasswordInput"
-                    v-model="form.contrasena_actual"
-                    type="password"
-                    class="block w-full px-4 py-3 bg-[#040a12] border border-[#162d4a] rounded-xl text-white text-xs focus:outline-none focus:border-[#00dfb2] transition"
-                    autocomplete="current-password"
-                    placeholder="Ingresa tu contraseña actual"
-                    required
-                />
+                <div class="relative">
+                    <input
+                        id="contrasena_actual"
+                        ref="currentPasswordInput"
+                        v-model="form.contrasena_actual"
+                        :type="showCurrentPassword ? 'text' : 'password'"
+                        class="block w-full px-4 pr-10 py-3 bg-[#040a12] border border-[#162d4a] rounded-xl text-white text-xs focus:outline-none focus:border-[#00dfb2] transition"
+                        autocomplete="current-password"
+                        placeholder="Ingresa tu contraseña actual"
+                        required
+                    />
+                    <button
+                        type="button"
+                        @click="showCurrentPassword = !showCurrentPassword"
+                        class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-500 hover:text-[#00dfb2] transition cursor-pointer"
+                    >
+                        <svg v-if="!showCurrentPassword" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                            <circle cx="12" cy="12" r="3" />
+                        </svg>
+                        <svg v-else xmlns="http://www.w3.org/2500/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.895 7.895L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" />
+                        </svg>
+                    </button>
+                </div>
                 <InputError :message="form.errors.contrasena_actual" class="mt-2" />
             </div>
 
             <!-- Nueva Contraseña -->
             <div class="space-y-1.5">
                 <label for="contrasena" class="text-[10px] font-bold text-[#00dfb2] uppercase tracking-widest block">Nueva Contraseña</label>
-                <input
-                    id="contrasena"
-                    ref="passwordInput"
-                    v-model="form.contrasena"
-                    type="password"
-                    class="block w-full px-4 py-3 bg-[#040a12] border border-[#162d4a] rounded-xl text-white text-xs focus:outline-none focus:border-[#00dfb2] transition"
-                    autocomplete="new-password"
-                    placeholder="Ingresa la nueva contraseña"
-                    required
-                />
+                <div class="relative">
+                    <input
+                        id="contrasena"
+                        ref="passwordInput"
+                        v-model="form.contrasena"
+                        :type="showNewPassword ? 'text' : 'password'"
+                        class="block w-full px-4 pr-10 py-3 bg-[#040a12] border border-[#162d4a] rounded-xl text-white text-xs focus:outline-none focus:border-[#00dfb2] transition"
+                        autocomplete="new-password"
+                        placeholder="Ingresa la nueva contraseña"
+                        required
+                    />
+                    <button
+                        type="button"
+                        @click="showNewPassword = !showNewPassword"
+                        class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-500 hover:text-[#00dfb2] transition cursor-pointer"
+                    >
+                        <svg v-if="!showNewPassword" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                            <circle cx="12" cy="12" r="3" />
+                        </svg>
+                        <svg v-else xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.895 7.895L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" />
+                        </svg>
+                    </button>
+                </div>
                 <InputError :message="form.errors.contrasena" class="mt-2" />
             </div>
 
             <!-- Confirmar Nueva Contraseña -->
             <div class="space-y-1.5">
                 <label for="contrasena_confirmation" class="text-[10px] font-bold text-[#00dfb2] uppercase tracking-widest block">Confirmar Nueva Contraseña</label>
-                <input
-                    id="contrasena_confirmation"
-                    v-model="form.contrasena_confirmation"
-                    type="password"
-                    class="block w-full px-4 py-3 bg-[#040a12] border border-[#162d4a] rounded-xl text-white text-xs focus:outline-none focus:border-[#00dfb2] transition"
-                    autocomplete="new-password"
-                    placeholder="Confirma la nueva contraseña"
-                    required
-                />
+                <div class="relative">
+                    <input
+                        id="contrasena_confirmation"
+                        v-model="form.contrasena_confirmation"
+                        :type="showConfirmNewPassword ? 'text' : 'password'"
+                        class="block w-full px-4 pr-10 py-3 bg-[#040a12] border border-[#162d4a] rounded-xl text-white text-xs focus:outline-none focus:border-[#00dfb2] transition"
+                        autocomplete="new-password"
+                        placeholder="Confirma la nueva contraseña"
+                        required
+                    />
+                    <button
+                        type="button"
+                        @click="showConfirmNewPassword = !showConfirmNewPassword"
+                        class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-500 hover:text-[#00dfb2] transition cursor-pointer"
+                    >
+                        <svg v-if="!showConfirmNewPassword" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                            <circle cx="12" cy="12" r="3" />
+                        </svg>
+                        <svg v-else xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.895 7.895L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" />
+                        </svg>
+                    </button>
+                </div>
                 <InputError :message="form.errors.contrasena_confirmation" class="mt-2" />
             </div>
 

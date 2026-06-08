@@ -1,6 +1,6 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Head, Link } from '@inertiajs/vue3';
+import { Head, Link, router } from '@inertiajs/vue3';
 import { ref } from 'vue';
 
 const props = defineProps({
@@ -12,7 +12,21 @@ const props = defineProps({
         type: Array,
         required: true,
     },
+    citasPendientes: {
+        type: Array,
+        default: () => [],
+    },
 });
+
+const updateCitaStatus = (id_cita, estado) => {
+    if (confirm(estado === 'Confirmada' ? '¿Estás seguro de que deseas confirmar esta cita?' : '¿Estás seguro de que deseas rechazar/cancelar esta cita?')) {
+        router.patch(route('doctor.appointments.status', id_cita), {
+            estado: estado
+        }, {
+            preserveScroll: true,
+        });
+    }
+};
 
 // AI Diagnostic Assistant state & logic
 const showAIModal = ref(false);
@@ -338,6 +352,55 @@ const getStatusClass = (status) => {
                                 </tr>
                                 <tr v-if="citas.length === 0">
                                     <td colspan="4" class="px-6 py-8 text-center text-slate-400">No hay citas programadas para hoy.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Tabla de Citas Pendientes de Confirmar (Futuras y Hoy) -->
+                <div v-if="citasPendientes.length > 0" class="xl:col-span-2 bg-white rounded-xl border border-slate-200 overflow-hidden flex flex-col shadow-md">
+                    <div class="p-6 border-b border-slate-200 flex items-center justify-between">
+                        <div>
+                            <h3 class="text-lg font-bold text-slate-800">Citas por Confirmar (Pendientes)</h3>
+                            <p class="text-xs text-slate-500 mt-1">Citas agendadas por pacientes esperando tu confirmación.</p>
+                        </div>
+                        <span class="px-2.5 py-1 text-xs font-bold text-amber-700 bg-amber-50 border border-amber-200 rounded-lg">{{ citasPendientes.length }} Pendientes</span>
+                    </div>
+                    <div class="overflow-x-auto flex-1">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-50 border-b border-slate-200">
+                                    <th class="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-400">Paciente</th>
+                                    <th class="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-400">Fecha / Hora</th>
+                                    <th class="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-400">Motivo / Síntomas</th>
+                                    <th class="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-400">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100">
+                                <tr v-for="cita in citasPendientes" :key="cita.id_cita" class="hover:bg-slate-50/50 transition">
+                                    <td class="px-6 py-4 font-bold text-slate-800 text-sm">{{ cita.paciente }}</td>
+                                    <td class="px-6 py-4 text-sm font-semibold text-slate-550">
+                                        <div class="text-slate-800">{{ cita.fecha }}</div>
+                                        <div class="text-[11px] text-slate-400 font-medium">{{ cita.hora }}</div>
+                                    </td>
+                                    <td class="px-6 py-4 text-sm text-slate-600 truncate max-w-xs" :title="cita.motivo">{{ cita.motivo }}</td>
+                                    <td class="px-6 py-4">
+                                        <div class="flex items-center gap-2">
+                                            <button 
+                                                @click="updateCitaStatus(cita.id_cita, 'Confirmada')"
+                                                class="px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white text-[10px] font-black rounded-lg shadow-sm transition cursor-pointer"
+                                            >
+                                                Confirmar
+                                            </button>
+                                            <button 
+                                                @click="updateCitaStatus(cita.id_cita, 'Cancelada')"
+                                                class="px-3 py-1.5 bg-rose-500 hover:bg-rose-600 text-white text-[10px] font-black rounded-lg shadow-sm transition cursor-pointer"
+                                            >
+                                                Rechazar
+                                            </button>
+                                        </div>
+                                    </td>
                                 </tr>
                             </tbody>
                         </table>

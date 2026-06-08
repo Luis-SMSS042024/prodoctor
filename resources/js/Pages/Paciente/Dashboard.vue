@@ -284,50 +284,63 @@ const getDoctorName = (docId) => {
 <template>
     <AuthenticatedLayout>
         <template #header>
-            <div class="flex flex-col md:flex-row md:items-center justify-between w-full gap-4">
-                <div>
-                    <h2 class="text-xl font-extrabold text-[#00dfb2] tracking-tight">Mi Portal Médico</h2>
-                    <p class="text-xs text-slate-400 mt-0.5">Bienvenido, {{ patient.nombres }} {{ patient.apellidos }}. Revisa tus citas y expediente clínico.</p>
-                </div>
-                
-                <!-- Sub-Navigation Tabs (Premium Dark glass design) moved to header right -->
-                <div class="bg-[#07111e] border border-[#13283f] rounded-xl p-1 flex flex-wrap gap-1 shadow-md select-none max-w-full md:max-w-xl">
-                    <button
-                        @click="activeMainTab = 'resumen'"
-                        class="px-4 py-2 rounded-lg text-xs font-bold transition duration-200 cursor-pointer flex items-center justify-center gap-1.5"
-                        :class="activeMainTab === 'resumen' ? 'bg-gradient-to-r from-[#00dfb2] to-[#00a887] text-slate-950 shadow-md font-extrabold' : 'text-slate-400 hover:bg-[#040a12] hover:text-white'"
-                    >
-                        Resumen
-                    </button>
-                    <button
-                        @click="activeMainTab = 'agendar'"
-                        class="px-4 py-2 rounded-lg text-xs font-bold transition duration-200 cursor-pointer flex items-center justify-center gap-1.5"
-                        :class="activeMainTab === 'agendar' ? 'bg-gradient-to-r from-[#00dfb2] to-[#00a887] text-slate-950 shadow-md font-extrabold' : 'text-slate-400 hover:bg-[#040a12] hover:text-white'"
-                    >
-                        Agendar
-                    </button>
-                    <button
-                        @click="activeMainTab = 'expediente'"
-                        class="px-4 py-2 rounded-lg text-xs font-bold transition duration-200 cursor-pointer flex items-center justify-center gap-1.5"
-                        :class="activeMainTab === 'expediente' ? 'bg-gradient-to-r from-[#00dfb2] to-[#00a887] text-slate-950 shadow-md font-extrabold' : 'text-slate-400 hover:bg-[#040a12] hover:text-white'"
-                    >
-                        Expediente
-                    </button>
-                    <button
-                        @click="activeMainTab = 'historial'"
-                        class="px-4 py-2 rounded-lg text-xs font-bold transition duration-200 cursor-pointer flex items-center justify-center gap-1.5"
-                        :class="activeMainTab === 'historial' ? 'bg-gradient-to-r from-[#00dfb2] to-[#00a887] text-slate-950 shadow-md font-extrabold' : 'text-slate-400 hover:bg-[#040a12] hover:text-white'"
-                    >
-                        Historial
-                    </button>
-                    <button
-                        @click="activeMainTab = 'perfil'"
-                        class="px-4 py-2 rounded-lg text-xs font-bold transition duration-200 cursor-pointer flex items-center justify-center gap-1.5"
-                        :class="activeMainTab === 'perfil' ? 'bg-gradient-to-r from-[#00dfb2] to-[#00a887] text-slate-950 shadow-md font-extrabold' : 'text-slate-400 hover:bg-[#040a12] hover:text-white'"
-                    >
-                        Perfil
-                    </button>
-                </div>
+            <h2 class="text-xl font-extrabold text-[#00dfb2] tracking-tight">Mi Portal Médico</h2>
+            <p class="text-xs text-slate-400 mt-0.5">Bienvenido, {{ patient.nombres }} {{ patient.apellidos }}. Revisa tus citas y expediente clínico.</p>
+        </template>
+
+        <template #sidebar-paciente>
+            <div class="pl-4 py-1 flex flex-col gap-1.5 ml-4 border-l border-[#13283f] mt-1">
+                <button
+                    @click="activeMainTab = 'resumen'"
+                    class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold transition duration-150 text-left cursor-pointer"
+                    :class="activeMainTab === 'resumen' ? 'bg-[#00dfb2]/10 text-[#00dfb2]' : 'text-slate-400 hover:bg-[#040a12]/50 hover:text-white'"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6a7.5 7.5 0 1 0 7.5 7.5h-7.5V6Z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 10.5H21A7.5 7.5 0 0 0 13.5 3v7.5Z" />
+                    </svg>
+                    Resumen
+                </button>
+                <button
+                    @click="activeMainTab = 'agendar'"
+                    class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold transition duration-150 text-left cursor-pointer"
+                    :class="activeMainTab === 'agendar' ? 'bg-[#00dfb2]/10 text-[#00dfb2]' : 'text-slate-400 hover:bg-[#040a12]/50 hover:text-white'"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+                    </svg>
+                    Agendar Cita
+                </button>
+                <button
+                    @click="activeMainTab = 'expediente'"
+                    class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold transition duration-150 text-left cursor-pointer"
+                    :class="activeMainTab === 'expediente' ? 'bg-[#00dfb2]/10 text-[#00dfb2]' : 'text-slate-400 hover:bg-[#040a12]/50 hover:text-white'"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+                    </svg>
+                    Expediente
+                </button>
+                <button
+                    @click="activeMainTab = 'historial'"
+                    class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold transition duration-150 text-left cursor-pointer"
+                    :class="activeMainTab === 'historial' ? 'bg-[#00dfb2]/10 text-[#00dfb2]' : 'text-slate-400 hover:bg-[#040a12]/50 hover:text-white'"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                    </svg>
+                    Historial
+                </button>
+                <button
+                    @click="activeMainTab = 'perfil'"
+                    class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold transition duration-150 text-left cursor-pointer"
+                    :class="activeMainTab === 'perfil' ? 'bg-[#00dfb2]/10 text-[#00dfb2]' : 'text-slate-400 hover:bg-[#040a12]/50 hover:text-white'"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0zM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                    </svg>
+                    Perfil
+                </button>
             </div>
         </template>
 
