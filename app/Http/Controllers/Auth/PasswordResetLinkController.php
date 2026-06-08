@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Log;
 use App\Models\User;
 use Inertia\Inertia;
 use Inertia\Response;
+use App\Helpers\MailHelper;
 
 class PasswordResetLinkController extends Controller
 {
@@ -44,14 +45,14 @@ class PasswordResetLinkController extends Controller
             'reset_otp_expires_at' => now()->addMinutes(10),
         ]);
 
-        try {
-            Mail::raw("Tu código de recuperación para restablecer tu contraseña en ProDoctor es: {$otp}", function ($message) use ($request) {
-                $message->to($request->email)
-                    ->subject('Código de recuperación de contraseña - ProDoctor');
-            });
-        } catch (\Exception $e) {
-            Log::info("Failed to send password reset OTP to {$request->email}: " . $e->getMessage());
-        }
+        // Send OTP to user's email
+        MailHelper::sendOtpMail(
+            $request->email,
+            'Código de recuperación de contraseña - ProDoctor',
+            'Recuperación de contraseña',
+            'Tu código de recuperación para restablecer tu contraseña en ProDoctor es:',
+            $otp
+        );
 
         return redirect()->route('password.verify-otp')->with('status', "Código enviado. (Para desarrollo, el código es: {$otp})");
     }

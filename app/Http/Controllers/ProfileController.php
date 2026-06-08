@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use Inertia\Response;
+use App\Helpers\MailHelper;
 
 class ProfileController extends Controller
 {
@@ -117,14 +118,14 @@ class ProfileController extends Controller
         }
 
         // Send OTP via email
-        try {
-            Mail::raw("Tu código de verificación de ProDoctor para confirmar tu " . ($request->type === 'password' ? 'contraseña' : 'correo') . " es: {$otp}", function ($message) use ($targetEmail) {
-                $message->to($targetEmail)
-                    ->subject('Código de verificación de ProDoctor');
-            });
-        } catch (\Exception $e) {
-            Log::info("Failed to send OTP to {$targetEmail}: " . $e->getMessage());
-        }
+        $topic = $request->type === 'password' ? 'cambio de contraseña' : 'cambio de correo';
+        MailHelper::sendOtpMail(
+            $targetEmail,
+            'Código de verificación de ProDoctor',
+            'Verificación de seguridad',
+            "Tu código de verificación para autorizar tu {$topic} en ProDoctor es:",
+            $otp
+        );
 
         return response()->json([
             'success' => true,

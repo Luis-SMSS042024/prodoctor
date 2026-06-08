@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Log;
 use App\Models\User;
 use Inertia\Inertia;
 use Inertia\Response;
+use App\Helpers\MailHelper;
 
 class AuthenticatedSessionController extends Controller
 {
@@ -51,14 +52,13 @@ class AuthenticatedSessionController extends Controller
             ]);
 
             // Send OTP to user's email
-            try {
-                Mail::raw("Tu código de verificación para ProDoctor es: {$otp}", function ($message) use ($user) {
-                    $message->to($user->correo)
-                        ->subject('Código de verificación de ProDoctor');
-                });
-            } catch (\Exception $e) {
-                Log::info("Failed to send OTP email to {$user->correo}: " . $e->getMessage());
-            }
+            MailHelper::sendOtpMail(
+                $user->correo,
+                'Código de verificación de ProDoctor',
+                'Código de inicio de sesión',
+                'Tu código de verificación de doble factor para iniciar sesión de forma segura en ProDoctor es:',
+                $otp
+            );
 
             return redirect()->route('otp.verify')->with('status', "Código enviado. (Para desarrollo, el código es: {$otp})");
         }

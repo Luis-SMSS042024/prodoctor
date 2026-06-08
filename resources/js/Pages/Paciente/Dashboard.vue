@@ -53,6 +53,13 @@ const checkTabParam = () => {
     }
 };
 
+const setTab = (tabName) => {
+    activeMainTab.value = tabName;
+    const url = new URL(window.location.href);
+    url.searchParams.set('tab', tabName);
+    window.history.replaceState(null, '', url.toString());
+};
+
 onMounted(() => {
     checkTabParam();
 });
@@ -208,7 +215,7 @@ const submitBooking = () => {
             bookingStep.value = 1;
             bookingForm.reset();
             alert('¡Tu cita médica ha sido agendada con éxito!');
-            activeMainTab.value = 'resumen';
+            setTab('resumen');
         }
     });
 };
@@ -291,7 +298,7 @@ const getDoctorName = (docId) => {
         <template #sidebar-paciente>
             <div class="pl-4 py-1 flex flex-col gap-1.5 ml-4 border-l border-[#13283f] mt-1">
                 <button
-                    @click="activeMainTab = 'resumen'"
+                    @click="setTab('resumen')"
                     class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold transition duration-150 text-left cursor-pointer"
                     :class="activeMainTab === 'resumen' ? 'bg-[#00dfb2]/10 text-[#00dfb2]' : 'text-slate-400 hover:bg-[#040a12]/50 hover:text-white'"
                 >
@@ -302,7 +309,7 @@ const getDoctorName = (docId) => {
                     Resumen
                 </button>
                 <button
-                    @click="activeMainTab = 'agendar'"
+                    @click="setTab('agendar')"
                     class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold transition duration-150 text-left cursor-pointer"
                     :class="activeMainTab === 'agendar' ? 'bg-[#00dfb2]/10 text-[#00dfb2]' : 'text-slate-400 hover:bg-[#040a12]/50 hover:text-white'"
                 >
@@ -312,7 +319,7 @@ const getDoctorName = (docId) => {
                     Agendar Cita
                 </button>
                 <button
-                    @click="activeMainTab = 'expediente'"
+                    @click="setTab('expediente')"
                     class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold transition duration-150 text-left cursor-pointer"
                     :class="activeMainTab === 'expediente' ? 'bg-[#00dfb2]/10 text-[#00dfb2]' : 'text-slate-400 hover:bg-[#040a12]/50 hover:text-white'"
                 >
@@ -322,7 +329,7 @@ const getDoctorName = (docId) => {
                     Expediente
                 </button>
                 <button
-                    @click="activeMainTab = 'historial'"
+                    @click="setTab('historial')"
                     class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold transition duration-150 text-left cursor-pointer"
                     :class="activeMainTab === 'historial' ? 'bg-[#00dfb2]/10 text-[#00dfb2]' : 'text-slate-400 hover:bg-[#040a12]/50 hover:text-white'"
                 >
@@ -332,7 +339,7 @@ const getDoctorName = (docId) => {
                     Historial
                 </button>
                 <button
-                    @click="activeMainTab = 'perfil'"
+                    @click="setTab('perfil')"
                     class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold transition duration-150 text-left cursor-pointer"
                     :class="activeMainTab === 'perfil' ? 'bg-[#00dfb2]/10 text-[#00dfb2]' : 'text-slate-400 hover:bg-[#040a12]/50 hover:text-white'"
                 >
@@ -396,7 +403,7 @@ const getDoctorName = (docId) => {
                         </div>
                     </div>
                     <button
-                        @click="activeMainTab = 'agendar'"
+                        @click="setTab('agendar')"
                         class="px-4 py-2 bg-gradient-to-r from-[#00dfb2] to-[#00a887] text-slate-950 text-xs font-black rounded-xl hover:from-[#00ffd5] hover:to-[#00c79f] shadow-md transition cursor-pointer"
                     >
                         Solicitar Cita

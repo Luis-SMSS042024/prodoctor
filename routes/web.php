@@ -44,6 +44,8 @@ Route::middleware(['auth'])->group(function () {
         'edit' => 'doctor.patients.edit',
         'update' => 'doctor.patients.update',
         'destroy' => 'doctor.patients.destroy',
+    ])->parameters([
+        'patients' => 'paciente'
     ]);
 
     // Agenda de Citas del Doctor

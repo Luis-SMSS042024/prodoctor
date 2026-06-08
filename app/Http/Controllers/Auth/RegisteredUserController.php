@@ -16,6 +16,7 @@ use Illuminate\Validation\Rules;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
+use App\Helpers\MailHelper;
 
 class RegisteredUserController extends Controller
 {
@@ -68,14 +69,13 @@ class RegisteredUserController extends Controller
         ]);
 
         // Send OTP to user's email
-        try {
-            Mail::raw("Tu código de verificación para completar tu registro en ProDoctor es: {$otp}", function ($message) use ($request) {
-                $message->to($request->correo)
-                    ->subject('Código de Verificación de Registro - ProDoctor');
-            });
-        } catch (\Exception $e) {
-            Log::info("Failed to send registration OTP email to {$request->correo}: " . $e->getMessage());
-        }
+        MailHelper::sendOtpMail(
+            $request->correo,
+            'Código de Verificación de Registro - ProDoctor',
+            'Verificación de Registro',
+            'Tu código de verificación para completar tu registro de paciente en ProDoctor es:',
+            $otp
+        );
 
         return redirect()->route('register.verify-otp')->with('status', "Código enviado. (Para desarrollo, el código es: {$otp})");
     }
@@ -190,16 +190,16 @@ class RegisteredUserController extends Controller
         $correo = session('reg_correo');
 
         // Send OTP
-        try {
-            Mail::raw("Tu nuevo código de verificación para completar tu registro en ProDoctor es: {$otp}", function ($message) use ($correo) {
-                $message->to($correo)
-                    ->subject('Nuevo Código de Verificación de Registro - ProDoctor');
-            });
-        } catch (\Exception $e) {
-            Log::info("Failed to resend registration OTP email to {$correo}: " . $e->getMessage());
-            if ($request->wantsJson()) {
-                return response()->json(['success' => false, 'message' => 'Error al enviar el correo electrónico.'], 500);
-            }
+        $sent = MailHelper::sendOtpMail(
+            $correo,
+            'Nuevo Código de Verificación de Registro - ProDoctor',
+            'Verificación de Registro',
+            'Tu nuevo código de verificación para completar tu registro de paciente en ProDoctor es:',
+            $otp
+        );
+
+        if (!$sent && $request->wantsJson()) {
+            return response()->json(['success' => false, 'message' => 'Error al enviar el correo electrónico.'], 500);
         }
 
         if ($request->wantsJson()) {
