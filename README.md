@@ -59,7 +59,7 @@ Para ejecutar este proyecto en tu entorno local, asegúrate de tener instalado:
 
 5.  **Restablecer la Base de Datos y Sembrar Datos:**
     Puedes ejecutar el script automatizado provisto en la raíz del proyecto para Windows:
-    *   Haz doble clic en: **`recrear_base_de_datos.bat`**
+    *   Haz doble clic en **`recrear_base_de_datos.bat`**
     
     *O manualmente desde la terminal ejecutando:*
     ```bash
