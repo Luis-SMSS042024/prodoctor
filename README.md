@@ -81,4 +81,4 @@ Para ejecutar este proyecto en tu entorno local, asegúrate de tener instalado:
 | **Administrador** | `admin@prodoctor.com` | `admin123` | Consola Administrativa (Tema Morado y Fucsia). |
 | **Doctor General** | `doctor1@prodoctor.com` | `doctor123` | Dashboard del Doctor con agenda diaria (Tema Azul). |
 | **Doctor Especialista** | `doctor2@prodoctor.com` | `doctor123` | Dashboard de Cardiología y consultas médicas. |
-| **Paciente Registrado** | `paciente1@prodoctor.com` | `paciente123` | Portal del Paciente (Tema Verde Esmeralda/Teal). |
+| **Paciente Registrado** | `paciente1@prodoctor.com` | `paciente123` | Portal del Paciente (Tema Verde Esmeralda/Teal)se puede registrastrar tambien. |
