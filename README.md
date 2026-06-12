@@ -10,7 +10,7 @@ ProDoctor es una solución web integral diseñada para la administración y cont
 *   Walter José Ramirez Pérez — `SMSS034824`
 *   Ludwin Saul Vasquez Romero — `SMSS034624`
 *   Josué Alexander Turcios Quintanilla — `SMSS948820`
-*   Kriscia Tatiana Del Cid Argueta — `SMSS`
+*   Kriscia Tatiana Del Cid Argueta — `SMSS089424`
 
 ---
 
