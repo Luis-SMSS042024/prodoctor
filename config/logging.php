@@ -104,7 +104,6 @@ return [
             'formatter' => env('LOG_STDERR_FORMATTER'),
             'processors' => [PsrLogMessageProcessor::class],
         ],
-
         'syslog' => [
             'driver' => 'syslog',
             'level' => env('LOG_LEVEL', 'debug'),
@@ -130,3 +129,4 @@ return [
     ],
 
 ];
+
